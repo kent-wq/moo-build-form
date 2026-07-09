@@ -1,0 +1,18 @@
+name: fetch-image
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl -sL -o full.png "https://sirennet.com/media/catalog/product/cache/a68cd95282f629852e6b9e296b7a5618/s/o/soundoff-blueprint-control-panel-handheld-fullsize_1_1.png"
+          convert full.png -crop 240x350+92+395 +repage -resize 200x -strip -quality 85 handheld.jpg
+          rm full.png
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add handheld.jpg
+          git commit -m "Add handheld controller photo"
+          git push
