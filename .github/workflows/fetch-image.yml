@@ -9,6 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           curl -sL -o full.png "https://sirennet.com/media/catalog/product/cache/a68cd95282f629852e6b9e296b7a5618/s/o/soundoff-blueprint-control-panel-handheld-fullsize_1_1.png"
+          sudo apt-get update -qq >/dev/null; sudo apt-get install -y -qq imagemagick >/dev/null
           convert full.png -crop 240x350+92+395 +repage -resize 200x -strip -quality 85 handheld.jpg
           rm full.png
           git config user.name github-actions
