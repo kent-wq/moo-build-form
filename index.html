@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Move Over Outfitters — New Vehicle Build Form</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#1A1D21; --paper:#F6F5F2; --panel:#FFFFFF; --line:#D9D6CF;
@@ -14,14 +12,14 @@
   --radius:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Barlow',system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:16px;line-height:1.45}
+body{font-family:'Leelawadee UI','Leelawadee','Segoe UI',system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:16px;line-height:1.45}
 header{background:var(--ink);color:#fff;padding:18px 16px 14px;position:sticky;top:0;z-index:50}
 .brand-row{display:flex;align-items:center;gap:12px}
 .logo-chip{background:#fff;border-radius:8px;padding:5px 10px;flex-shrink:0}
 .logo-chip img{height:46px;display:block}
 .head-inner{max-width:860px;margin:0 auto}
-.brand{font-family:'Barlow Condensed';font-weight:700;font-size:26px;letter-spacing:.06em;text-transform:uppercase}
-.brand span{color:var(--amber)}
+.brand{font-family:'Leelawadee UI','Leelawadee','Segoe UI',system-ui,sans-serif;font-weight:700;font-size:26px;letter-spacing:.06em;text-transform:uppercase}
+.brand span{color:#fff}
 .sub{font-size:13px;color:#B9BEC6;margin-top:2px}
 /* signature: lightbar progress strip */
 .lightbar{display:flex;gap:3px;margin-top:12px;height:8px}
@@ -34,7 +32,7 @@ section.card{background:var(--panel);border:1px solid var(--line);border-radius:
 section.card.hidden{display:none}
 .card-head{padding:14px 18px;border-bottom:1px solid var(--line);background:linear-gradient(#FBFAF8,#F3F1EC)}
 .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.card-head h2{font-family:'Barlow Condensed';font-size:24px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--steel)}
+.card-head h2{font-family:'Leelawadee UI','Leelawadee','Segoe UI',system-ui,sans-serif;font-size:24px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--steel)}
 .card-body{padding:18px}
 .field{margin-bottom:16px}
 .field:last-child{margin-bottom:0}
@@ -66,7 +64,7 @@ textarea{resize:vertical;min-height:64px}
 #summaryOut{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;max-height:420px;overflow:auto;display:none;margin-top:12px}
 .missing{outline:2px solid var(--red);outline-offset:1px;background:#FDF3F2}
 #missingPanel{display:none;border:1px solid var(--amber);border-left:5px solid var(--amber);background:#FCF6E8;border-radius:8px;padding:14px;margin-bottom:14px}
-#missingPanel h3{font-family:'Barlow Condensed';font-size:19px;text-transform:uppercase;letter-spacing:.04em;color:#8A5A00;margin-bottom:8px}
+#missingPanel h3{font-family:'Leelawadee UI','Leelawadee','Segoe UI',system-ui,sans-serif;font-size:19px;text-transform:uppercase;letter-spacing:.04em;color:#8A5A00;margin-bottom:8px}
 .mi{padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
 .mi:last-of-type{border-bottom:none}
 .mi b{display:block}
@@ -317,7 +315,7 @@ textarea{resize:vertical;min-height:64px}
   <div class="field reveal" id="truckSection">
     <label class="q">Trucks Only — Cab / Bed / Exterior Accessories</label>
     <div class="hint">Shown because your vehicle list includes a truck. Select anything you'd like on the quote.</div>
-    <div class="opts" data-check="truckAcc" data-options='["Tonneau Cover — Soft Roll-Up","Tonneau Cover — Hard Folding","Tonneau Cover — Retractable","Fiberglass Topper / Cap — numerous added options","Aluminum Topper / Cap — numerous added options","Spray-In Bed Liner","Drop-In Bed Liner / Bed Mat / BedRug","Bedslide / Cargo Slide","Decked Bed Organizer / Drawer System","Toolbox","Ladder / Utility Rack","Headache Rack / Cab Protector","Truck Side Steps / Running Boards","Bed Lighting","Tailgate Seal Kit","Bed Extender","Trailer Hitch / Towing Accessories","Mud Flaps / Fender Flares","None","Other"]'></div>
+    <div class="opts" data-check="truckAcc" data-options='["Tonneau Cover — Soft Roll-Up","Tonneau Cover — Hard Folding","Tonneau Cover — Retractable","Fiberglass Topper / Cap — numerous added options","Aluminum Topper / Cap — numerous added options","Spray-In Bed Liner","Drop-In Bed Liner / Bed Mat / BedRug","Bedslide / Cargo Slide","Decked Bed Organizer / Drawer System","Toolbox","Ladder / Utility Rack","Headache Rack / Cab Protector","Truck Side Steps / Running Boards","Bed Lighting","Tailgate Seal Kit","Bed Extender","MultiPro / Multi-Flex Tailgate (GMC / Chevrolet factory option)","RamBox Bed Storage (Ram factory option)","Trailer Hitch / Towing Accessories","Mud Flaps / Fender Flares","None","Other"]'></div>
     <div class="reveal" data-show="truckAcc~Other"><input type="text" id="truckAccOther"></div></div>
 </div></section>
 
@@ -425,6 +423,16 @@ function paint(){
     el.classList.toggle('open',open);
   });
   $('#truckSection').classList.toggle('open',VEH.some(v=>v.body==='Truck'));
+  // make-specific truck options
+  const truckMake=mks=>VEH.some(v=>v.body==='Truck'&&mks.includes(v.make));
+  $$('[name="truckAcc"]').forEach(i=>{
+    let show=null;
+    if(i.value.startsWith('MultiPro'))show=truckMake(['Chevrolet','GMC']);
+    if(i.value.startsWith('RamBox'))show=truckMake(['Ram']);
+    if(show===null)return;
+    i.closest('.opt').style.display=show?'':'none';
+    if(!show)i.checked=false;
+  });
   $('#ptk9').classList.toggle('hidden',!(val('agencyType')==='Police'||(val('use')||[]).includes('K9 Unit')));
   // police-only options
   const isPolice=val('agencyType')==='Police';
