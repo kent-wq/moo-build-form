@@ -51,6 +51,7 @@ textarea{resize:vertical;min-height:64px}
 .opt.checked{border-color:var(--blue);background:#F0F5FD}
 .reveal{display:none;margin-top:10px;padding:12px;border-left:3px solid var(--amber);background:#FCF8EF;border-radius:0 8px 8px 0}
 .reveal.open{display:block}
+.gate-reveal{padding:0;border-left:none;background:transparent;margin-top:14px}
 .tint-grid{width:100%;border-collapse:collapse;font-size:14px}
 .tint-grid th,.tint-grid td{border:1px solid var(--line);padding:8px 6px;text-align:center}
 .tint-grid td:first-child{text-align:left;font-weight:600;background:#FBFAF8}
@@ -74,6 +75,8 @@ textarea{resize:vertical;min-height:64px}
 .note{font-size:13px;color:var(--muted)}
 .radio-rows .row{display:flex;gap:8px;margin-bottom:8px}
 .vrow{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.vrow.reveal{display:none}
+.vrow.reveal.open{display:flex}
 .vrow select,.vrow input[type=text]{flex:1;min-width:130px}
 .vlist{list-style:none;margin-top:6px}
 .vlist li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;margin-bottom:6px;background:#fff;font-size:15px}
@@ -239,8 +242,8 @@ textarea{resize:vertical;min-height:64px}
 <section class="card" data-sec="camera"><div class="card-head"><div class="eyebrow">Section 9</div><h2>Camera System</h2></div>
 <div class="card-body">
   <div class="field"><label class="q">Camera System Requirements (select all that apply)</label>
-    <div class="opts" data-check="camera" data-options='["This vehicle will not have a camera","I have a camera (make/model below)","I need to buy a camera — preferred make/model below","I need to buy a camera — please give a suggestion","Axon Camera System","Utility / Body Worn Camera System","Watchguard Camera System"]'></div>
-    <div class="reveal" data-show="camera~I have a camera (make/model below)|camera~I need to buy a camera — preferred make/model below">
+    <div class="opts" data-check="camera" data-options='["I need to buy a camera — preferred make/model below","I need to buy a camera — please give a suggestion","I will provide a complete Axon camera system","I will provide a complete Utility camera system","I will provide a complete Watchguard camera system"]'></div>
+    <div class="reveal" data-show="camera~I need to buy a camera — preferred make/model below">
       <label class="q">Camera make and model (existing or preferred)</label><input type="text" id="cameraMM"></div></div>
 </div></section>
 
@@ -337,6 +340,35 @@ textarea{resize:vertical;min-height:64px}
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const state={};
+
+// Section gates — each equipment section starts with a not-have / quote choice,
+// and the detailed options only appear after "I am interested in quoting…"
+const GATES={
+  lighting:'emergency lighting',
+  siren:'a siren & light controller',
+  console:'a console',
+  computer:'a computer / printer',
+  radios:'radio(s)',
+  camera:'a camera system',
+  bumper:'a push bumper / guard',
+  tint:'window tint or graphics',
+  misc:'accessories / power options'
+};
+Object.entries(GATES).forEach(([sec,thing])=>{
+  const body=document.querySelector(`section[data-sec="${sec}"] .card-body`);
+  if(!body)return;
+  const yes=`I am interested in quoting ${thing}`;
+  const wrap=document.createElement('div');
+  wrap.className='reveal gate-reveal';
+  wrap.setAttribute('data-show',`gate_${sec}=${yes}`);
+  while(body.firstChild)wrap.append(body.firstChild);
+  const field=document.createElement('div');field.className='field';
+  const opts=document.createElement('div');opts.className='opts';
+  opts.setAttribute('data-radio',`gate_${sec}`);
+  opts.setAttribute('data-options',JSON.stringify([`This vehicle will not have ${thing}`,yes]));
+  field.append(opts);
+  body.append(field,wrap);
+});
 
 // Build option groups
 $$('[data-radio],[data-check]').forEach(g=>{
@@ -626,26 +658,27 @@ function buildSummary(){
     s+=line('Items to Reuse',ru);
   }
   const lightGrp=(n,other)=>{let v=g(n)||[];if(v.includes('Other')&&f(other))v=v.map(u=>u==='Other'?'Other: '+f(other):u);return v};
-  s+='\n— LIGHTING —\n';
+  const gate=sec=>line('Interest',g('gate_'+sec)||'(not answered)');
+  s+='\n— LIGHTING —\n'+gate('lighting');
   s+=line('Front',lightGrp('frontLight','frontLightOther'));
   s+=line('Side',lightGrp('sideLight','sideLightOther'));
   s+=line('Rear',lightGrp('rearLight','rearLightOther'));
   s+=line('Interior',lightGrp('intLight','intLightOther'));
-  s+='\n— SIREN & CONTROL —\n';
+  s+='\n— SIREN & CONTROL —\n'+gate('siren');
   s+=line('Controller',g('sirenCtrl')==='Other'?'Other: '+f('sirenCtrlOther'):g('sirenCtrl'));
   s+=line('Primary Speaker',g('sirenSpk'))+line('Low Frequency',g('lowFreq'))+line('Brand/Requirements',f('sirenNotes'));
-  s+='\n— CONSOLE / COMPUTER / PRINTER —\n';
+  s+='\n— CONSOLE / COMPUTER / PRINTER —\n'+line('Console Interest',g('gate_console')||'(not answered)')+line('Computer/Printer Interest',g('gate_computer')||'(not answered)');
   let con=g('console');if(con&&con.startsWith('Reuse')&&f('consoleMM'))con+=' — '+f('consoleMM');
   if(con==='Other')con='Other: '+f('consoleOther');
   s+=line('Console',con);
   s+=line('Computer',g('computer')==='Yes, a computer / mount is needed'?('Needed — '+(f('computerMM')||'make/model TBD')):g('computer'));
   s+=line('Printer',g('printer')==='I have a printer'?('Existing — '+(f('printerMM')||'make/model TBD')):g('printer'));
-  s+='\n— RADIO(S) —\n'+line('Radio Plan',g('radio'));
+  s+='\n— RADIO(S) —\n'+gate('radios')+line('Radio Plan',g('radio'));
   const radios=$$('.radioMM').map(e=>e.value.trim()).filter(Boolean);
   s+=line('Radio Make/Model',radios);
   s+=line('Mount Style',g('radioMount')==='Other'?'Other: '+f('radioMountOther'):g('radioMount'));
-  s+='\n— CAMERA / BUMPER —\n'+line('Camera',g('camera'))+line('Camera Make/Model',f('cameraMM'));
-  s+=line('Bumper',g('bumper'))+line('Bumper Make/Model',f('bumperMM'));
+  s+='\n— CAMERA / BUMPER —\n'+line('Camera Interest',g('gate_camera')||'(not answered)')+line('Camera',g('camera'))+line('Camera Make/Model',f('cameraMM'));
+  s+=line('Bumper Interest',g('gate_bumper')||'(not answered)')+line('Bumper',g('bumper'))+line('Bumper Make/Model',f('bumperMM'));
   if(g('agencyType')==='Police'||(g('use')||[]).includes('K9 Unit')){
     s+='\n— PRISONER TRANSPORT / K9 —\n';
     s+=line('Prisoner Equipment',lightGrp('ptEquip','ptEquipOther'));
@@ -656,11 +689,11 @@ function buildSummary(){
     s+=line('K9 Electronics (AceK9)',lightGrp('k9Elec','k9ElecOther'));
     s+=line('K9 Brand',g('k9Brand')==='Other'?'Other: '+f('k9BrandOther'):g('k9Brand'));
   }
-  s+='\n— TINT & GRAPHICS —\n';
+  s+='\n— TINT & GRAPHICS —\n'+gate('tint');
   tintRows.forEach((r,i)=>{s+=line('Tint: '+r,val('tint'+i))});
   s+=line('Tint Notes',f('tintNotes'));
   s+=line('Graphics',g('graphics')==='Other'?'Other: '+f('graphicsOther'):g('graphics'));
-  s+='\n— ACCESSORIES & POWER —\n';
+  s+='\n— ACCESSORIES & POWER —\n'+gate('misc');
   s+=line('Misc Accessories',lightGrp('misc','miscOther'));
   s+=line('Weapon Security',lightGrp('weapon','weaponOther'));
   s+=line('Shore Power/Charger/Inverter',lightGrp('shore','shoreOther'));
