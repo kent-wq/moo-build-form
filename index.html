@@ -50,6 +50,7 @@ textarea{resize:vertical;min-height:64px}
 .reveal{display:none;margin-top:10px;padding:12px;border-left:3px solid var(--amber);background:#FCF8EF;border-radius:0 8px 8px 0}
 .reveal.open{display:block}
 .gate-reveal{padding:0;border-left:none;background:transparent;margin-top:14px}
+.opt-photo{display:block;height:92px;margin:6px auto 0;border-radius:6px}
 .tint-grid{width:100%;border-collapse:collapse;font-size:14px}
 .tint-grid th,.tint-grid td{border:1px solid var(--line);padding:8px 6px;text-align:center}
 .tint-grid td:first-child{text-align:left;font-weight:600;background:#FBFAF8}
@@ -368,6 +369,9 @@ Object.entries(GATES).forEach(([sec,thing])=>{
   body.append(field,wrap);
 });
 
+// Photos attached to specific options
+const OPT_IMGS={sirenCtrl:{'Handheld':'handheld.jpg'}};
+
 // Build option groups
 $$('[data-radio],[data-check]').forEach(g=>{
   const isRadio=g.hasAttribute('data-radio');
@@ -378,6 +382,8 @@ $$('[data-radio],[data-check]').forEach(g=>{
     const i=document.createElement('input');i.type=isRadio?'radio':'checkbox';i.name=name;i.value=o;
     const s=document.createElement('span');s.textContent=o;
     l.append(i,s);g.append(l);
+    const ph=OPT_IMGS[name]&&OPT_IMGS[name][o];
+    if(ph){const im=document.createElement('img');im.src=ph;im.alt=o;im.className='opt-photo';s.append(im)}
     i.addEventListener('change',()=>{onChange(name)});
   });
 });
