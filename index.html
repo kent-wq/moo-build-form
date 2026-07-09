@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Move Over Outfitters — New Vehicle Build Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A1D21; --paper:#F6F5F2; --panel:#FFFFFF; --line:#D9D6CF;
+  --steel:#3D444D; --muted:#6B7280;
+  --red:#C8342B; --blue:#1F4E9C; --amber:#E8A020;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:16px;line-height:1.45}
+header{background:var(--ink);color:#fff;padding:18px 16px 14px;position:sticky;top:0;z-index:50}
+.brand-row{display:flex;align-items:center;gap:12px}
+.logo-chip{background:#fff;border-radius:8px;padding:5px 10px;flex-shrink:0}
+.logo-chip img{height:46px;display:block}
+.head-inner{max-width:860px;margin:0 auto}
+.brand{font-family:'Barlow Condensed';font-weight:700;font-size:26px;letter-spacing:.06em;text-transform:uppercase}
+.brand span{color:var(--amber)}
+.sub{font-size:13px;color:#B9BEC6;margin-top:2px}
+/* signature: lightbar progress strip */
+.lightbar{display:flex;gap:3px;margin-top:12px;height:8px}
+.lightbar .seg{flex:1;background:#2A2F36;border-radius:2px;transition:background .4s}
+.lightbar .seg.on:nth-child(odd){background:var(--red);box-shadow:0 0 8px rgba(200,52,43,.7)}
+.lightbar .seg.on:nth-child(even){background:var(--blue);box-shadow:0 0 8px rgba(31,78,156,.7)}
+.progress-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8A9099;margin-top:6px}
+main{max-width:860px;margin:0 auto;padding:20px 16px 80px}
+section.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px;overflow:hidden}
+section.card.hidden{display:none}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--line);background:linear-gradient(#FBFAF8,#F3F1EC)}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card-head h2{font-family:'Barlow Condensed';font-size:24px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--steel)}
+.card-body{padding:18px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+label.q{display:block;font-weight:600;margin-bottom:6px}
+.hint{font-size:13px;color:var(--muted);margin:-2px 0 8px}
+input[type=text],input[type=tel],input[type=email],textarea,select{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--blue);outline-offset:1px}
+textarea{resize:vertical;min-height:64px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
+.opt{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:15px}
+.opt:hover{border-color:var(--steel)}
+.opt input{margin-top:3px;accent-color:var(--blue);flex-shrink:0}
+.opt.checked{border-color:var(--blue);background:#F0F5FD}
+.reveal{display:none;margin-top:10px;padding:12px;border-left:3px solid var(--amber);background:#FCF8EF;border-radius:0 8px 8px 0}
+.reveal.open{display:block}
+.tint-grid{width:100%;border-collapse:collapse;font-size:14px}
+.tint-grid th,.tint-grid td{border:1px solid var(--line);padding:8px 6px;text-align:center}
+.tint-grid td:first-child{text-align:left;font-weight:600;background:#FBFAF8}
+.tint-grid input{accent-color:var(--blue)}
+.btn{font:inherit;font-weight:600;border:none;border-radius:8px;padding:12px 20px;cursor:pointer}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#000}
+.btn-ghost{background:none;border:1px solid var(--line);color:var(--steel)}
+.btn-sm{padding:7px 12px;font-size:14px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.savebar{font-size:12px;color:var(--muted);text-align:right;margin:-8px 0 12px}
+#summaryOut{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;max-height:420px;overflow:auto;display:none;margin-top:12px}
+.missing{outline:2px solid var(--red);outline-offset:1px;background:#FDF3F2}
+#missingPanel{display:none;border:1px solid var(--amber);border-left:5px solid var(--amber);background:#FCF6E8;border-radius:8px;padding:14px;margin-bottom:14px}
+#missingPanel h3{font-family:'Barlow Condensed';font-size:19px;text-transform:uppercase;letter-spacing:.04em;color:#8A5A00;margin-bottom:8px}
+.mi{padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.mi:last-of-type{border-bottom:none}
+.mi b{display:block}
+.mi span{color:var(--muted)}
+.mi a{color:var(--blue);font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap}
+.note{font-size:13px;color:var(--muted)}
+.radio-rows .row{display:flex;gap:8px;margin-bottom:8px}
+.vrow{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.vrow select,.vrow input[type=text]{flex:1;min-width:130px}
+.vlist{list-style:none;margin-top:6px}
+.vlist li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;margin-bottom:6px;background:#fff;font-size:15px}
+.vlist .rm{background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;font-size:16px;padding:2px 6px}
+@media print{header,.actions,.btn,.savebar{display:none}#summaryOut{display:block;max-height:none;border:none}}
+@media (prefers-reduced-motion:reduce){.lightbar .seg{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="brand-row">
+      <div class="logo-chip"><img src="data:image/jpeg;base64,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" alt="Move Over Outfitters"></div>
+      <div>
+        <div class="brand" id="brandText">Move Over <span>Outfitters</span></div>
+        <div class="sub">New Emergency Vehicle Upfit Planning — Build Form</div>
+      </div>
+    </div>
+    <div class="lightbar" id="lightbar"></div>
+    <div class="progress-label" id="progLabel">0 of 12 sections started</div>
+  </div>
+</header>
+<main>
+<div class="savebar" id="saveStatus">Draft autosaves as you type</div>
+
+<!-- 1. CONTACT -->
+<section class="card" data-sec="contact"><div class="card-head"><div class="eyebrow">Section 1</div><h2>Agency & Contact</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Agency or Company Name *</label><input type="text" id="agency"></div>
+  <div class="field"><label class="q">Contact Person (rank &amp; name) *</label><input type="text" id="contact" placeholder="e.g. Sgt. John Smith"></div>
+  <div class="field"><label class="q">Contact Phone Number *</label><input type="tel" id="phone" placeholder="765-555-5555"></div>
+  <div class="field"><label class="q">Contact Email *</label><input type="email" id="email" placeholder="example@example.com"></div>
+  <div class="field"><label class="q">Vehicle / Contact Notes</label>
+    <div class="hint">Example: This vehicle will be driven by Officer Smith and his cell number is 765-555-5555</div>
+    <textarea id="notes"></textarea></div>
+  <div class="field"><label class="q">Agency Type *</label><div class="opts" data-radio="agencyType"
+    data-options='["EMS","Fire","Police","Utility","Other"]'></div>
+    <div class="reveal" data-show="agencyType=Other"><input type="text" id="agencyTypeOther" placeholder="Describe agency type"></div>
+  </div>
+</div></section>
+
+<!-- 2. NEW VEHICLE -->
+<section class="card" data-sec="vehicle"><div class="card-head"><div class="eyebrow">Section 2</div><h2>New Vehicle Info</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Do you know which vehicle(s) you're purchasing?</label>
+    <div class="opts" data-radio="vehicleCertainty" data-options='["Yes — we know exactly what we&apos;re getting","Not sure yet — we have a few vehicles in mind"]'></div>
+    <div class="reveal" data-show="vehicleCertainty=Not sure yet — we have a few vehicles in mind">
+      <div class="note" style="margin-bottom:8px">No problem — add the vehicles you're considering below and we'll quote around them, or jot your thoughts here.</div>
+      <textarea id="vehicleIdeas" placeholder="e.g. Deciding between a Tahoe PPV and a Durango Pursuit; may add a Silverado for the grass rig"></textarea></div></div>
+  <div class="field"><label class="q">New Vehicle(s) — Year / Make / Model / Quantity</label>
+    <div class="hint">Pick a make and the model list narrows to what's available for that year. Trucks unlock cab and bed choices. Mixed fleets are fine — add each vehicle.</div>
+    <div class="vrow">
+      <select id="vYear" aria-label="Year"></select>
+      <select id="vMake" aria-label="Make"><option value="">Make…</option></select>
+      <select id="vModel" aria-label="Model" disabled><option value="">Model…</option></select>
+    </div>
+    <div class="vrow reveal" id="truckOpts">
+      <select id="vCab" aria-label="Cab configuration"></select>
+      <select id="vBed" aria-label="Bed length"></select>
+    </div>
+    <div class="vrow">
+      <input type="text" id="vTrim" placeholder="Trim / package (PPV, SSV, Pursuit…) — optional">
+      <input type="number" id="vQty" min="1" value="1" style="max-width:90px" aria-label="Quantity">
+      <button type="button" class="btn btn-ghost btn-sm" id="addVehicle">+ Add vehicle</button>
+    </div>
+    <div class="reveal" id="vOtherWrap">
+      <div class="vrow" style="margin-bottom:0">
+        <input type="text" id="vOther" placeholder="Type the year / make / model">
+        <select id="vOtherBody" aria-label="Body style"><option>SUV</option><option>Truck</option><option>Sedan</option><option>Van</option></select>
+      </div></div>
+    <ul class="vlist" id="vList"></ul></div>
+  <div class="field"><label class="q">Intended Vehicle Use (select all that apply)</label>
+    <div class="opts" data-check="use" data-options='["Patrol","K9 Unit","Admin","Detective","Special / SWAT","Squad","Brush / Off-Road","Commander","Battalion","Other"]'></div>
+    <div class="reveal" data-show="use~Other"><input type="text" id="useOther" placeholder="Describe intended use"></div></div>
+</div></section>
+
+<!-- 3. TRADE-IN -->
+<section class="card" data-sec="trade"><div class="card-head"><div class="eyebrow">Section 3</div><h2>Trade-In / Donor Vehicle</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Do you have a trade-in or donor vehicle that will need stripped of graphics and/or equipment?</label>
+    <div class="opts" data-radio="hasTrade" data-options='["No, this is a completely new build.","Yes, we have a trade-in / donor vehicle."]'></div></div>
+  <div class="reveal" data-show="hasTrade=Yes, we have a trade-in / donor vehicle.">
+    <div class="field"><label class="q">Year / Make / Model of the trade-in or donor vehicle</label><input type="text" id="tradeYMM"></div>
+    <div class="field"><label class="q">Which existing items do you intend to reuse?</label>
+      <div class="opts" data-check="reuse" data-options='["Radio","Radar","Computer","Camera","Modem","Stop Sticks","Fire Extinguisher","Opticom","Other"]'></div>
+      <div class="reveal" data-show="reuse~Other"><input type="text" id="reuseOther" placeholder="List the other items to reuse"></div></div>
+  </div>
+</div></section>
+
+<!-- 4. LIGHTING -->
+<section class="card" data-sec="lighting"><div class="card-head"><div class="eyebrow">Section 4</div><h2>Lighting</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Front Lighting Preferences</label>
+    <div class="opts" data-check="frontLight" data-options='["Rooftop Lightbar","Interior Visor","Dash Light","2 Grille Lights","4 Grille Lights","Front Warning Stick","Front Offroad Flood Bar","Headlight Flasher","None","Other"]'></div>
+    <div class="reveal" data-show="frontLight~Other"><input type="text" id="frontLightOther"></div></div>
+  <div class="field"><label class="q">Side Lighting Preferences</label>
+    <div class="opts" data-check="sideLight" data-options='["Rocker Lights","Under Mirror Intersector Light","Front Bumper Light","Rear Bumper Light","Front Fender Light","Front Over Wheel Light","Rear Fender Light","Rear Over Wheel Light","Rear Door Light","Rear 1/4 Glass Light","Side Flood Bar / Work Light","None","Other"]'></div>
+    <div class="reveal" data-show="sideLight~Other"><input type="text" id="sideLightOther"></div></div>
+  <div class="field"><label class="q">Rear Lighting Preferences</label>
+    <div class="opts" data-check="rearLight" data-options='["Rear Exterior Spoiler","Rear Interior Visor","2 Interior Lights on Brackets","Plate Area","Rear Bumper","Taillight Flasher","Rear Flood Bar / Work Light","Open Hatch Warning","None","Other"]'></div>
+    <div class="reveal" data-show="rearLight~Other"><input type="text" id="rearLightOther"></div></div>
+  <div class="field"><label class="q">Extra Interior Lighting Preferences</label>
+    <div class="opts" data-check="intLight" data-options='["Interior Dome Light","Rear Hatch Dome Light","Compartment Light","Console Gooseneck Light","None","Other"]'></div>
+    <div class="reveal" data-show="intLight~Other"><input type="text" id="intLightOther"></div></div>
+</div></section>
+
+<!-- 5. SIREN -->
+<section class="card" data-sec="siren"><div class="card-head"><div class="eyebrow">Section 5</div><h2>Siren & Light Control</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Siren controller style preference</label>
+    <div class="opts" data-radio="sirenCtrl" data-options='["Rotary Knob","Push Button","Handheld","No siren style preference","None","Other"]'></div>
+    <div class="reveal" data-show="sirenCtrl=Other"><input type="text" id="sirenCtrlOther"></div></div>
+  <div class="field"><label class="q">Primary Siren Speaker Preference</label>
+    <div class="opts" data-radio="sirenSpk" data-options='["Two Speakers (louder and dual tone)","One Speaker Only (more cost effective)","None","I&apos;m not sure, quote what you suggest"]'></div></div>
+  <div class="field"><label class="q">Low Frequency Siren Speaker Preference</label>
+    <div class="opts" data-radio="lowFreq" data-options='["Dual Low Frequency (louder)","Single Low Frequency (more cost effective)","None","I&apos;m not sure, quote what you suggest"]'></div></div>
+  <div class="field"><label class="q">Any preferred brands or specific requirements for the siren and light controller?</label>
+    <textarea id="sirenNotes"></textarea></div>
+</div></section>
+
+<!-- 6. CONSOLE -->
+<section class="card" data-sec="console"><div class="card-head"><div class="eyebrow">Section 6</div><h2>Console</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Console Preference</label>
+    <div class="opts" data-radio="console" data-options='["This vehicle will not have an aftermarket console","New metal console — open to options","I prefer Havis branded consoles","I prefer Gamber branded consoles","Reuse my existing console (same body style)","Other"]'></div>
+    <div class="reveal" data-show="console=Reuse my existing console (same body style)"><label class="q">Existing console make and model</label><input type="text" id="consoleMM"></div>
+    <div class="reveal" data-show="console=Other"><input type="text" id="consoleOther"></div></div>
+</div></section>
+
+<!-- 7. COMPUTER & PRINTER -->
+<section class="card" data-sec="computer"><div class="card-head"><div class="eyebrow">Section 7</div><h2>Computer & Printer</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Computer / Mount Requirements</label>
+    <div class="opts" data-radio="computer" data-options='["This vehicle will not have a computer / mount","Yes, a computer / mount is needed"]'></div>
+    <div class="reveal" data-show="computer=Yes, a computer / mount is needed"><label class="q">Computer make and model</label>
+      <div class="hint">We use the exact make/model to order the correct dock, mount, and charger — the build can stall without it.</div>
+      <input type="text" id="computerMM" placeholder="e.g. Getac V110, Panasonic CF-33, iPad 10th gen"></div></div>
+  <div class="field"><label class="q">Printer</label>
+    <div class="opts" data-radio="printer" data-options='["This vehicle will not have a printer","I need to buy a printer — please quote one","I have a printer"]'></div>
+    <div class="reveal" data-show="printer=I have a printer"><label class="q">Existing printer make and model</label><input type="text" id="printerMM"></div></div>
+</div></section>
+
+<!-- 8. RADIOS -->
+<section class="card" data-sec="radios"><div class="card-head"><div class="eyebrow">Section 8</div><h2>Radio(s)</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Radio Requirements</label>
+    <div class="hint">This is important so we can order and install all items.</div>
+    <div class="opts" data-radio="radio" data-options='["This vehicle will not need an in-car radio","Prewire the vehicle for one radio that will be installed at a later date","I need to buy radio(s) — interested to hear the options","I have radio(s) — make and model below"]'></div>
+    <div class="reveal" data-show="radio=I have radio(s) — make and model below">
+      <label class="q">Radio make and model (up to 3)</label>
+      <div class="hint">The exact radio determines the console bracket and faceplates we order — without it we can't build your console correctly.</div>
+      <div class="radio-rows" id="radioRows">
+        <div class="row"><input type="text" class="radioMM" placeholder="Radio 1 make/model"></div>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" id="addRadio">+ Add another radio</button>
+      <div class="field" style="margin-top:12px"><label class="q">Customer-supplied radio mount style</label>
+        <div class="opts" data-radio="radioMount" data-options='["Console Mounted","Remote Head (trunk / cargo mounted body)","Dash Mounted","Not sure — recommend one","Other"]'></div>
+        <div class="reveal" data-show="radioMount=Other"><input type="text" id="radioMountOther"></div></div>
+    </div></div>
+</div></section>
+
+<!-- 9. CAMERA -->
+<section class="card" data-sec="camera"><div class="card-head"><div class="eyebrow">Section 9</div><h2>Camera System</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Camera System Requirements (select all that apply)</label>
+    <div class="opts" data-check="camera" data-options='["This vehicle will not have a camera","I have a camera (make/model below)","I need to buy a camera — preferred make/model below","I need to buy a camera — please give a suggestion","Axon Camera System","Utility / Body Worn Camera System","Watchguard Camera System"]'></div>
+    <div class="reveal" data-show="camera~I have a camera (make/model below)|camera~I need to buy a camera — preferred make/model below">
+      <label class="q">Camera make and model (existing or preferred)</label><input type="text" id="cameraMM"></div></div>
+</div></section>
+
+<!-- 10. BUMPER -->
+<section class="card" data-sec="bumper"><div class="card-head"><div class="eyebrow">Section 10</div><h2>Front Bumper / Push Bumper / Guard</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Select all that apply</label>
+    <div class="opts" data-check="bumper" data-options='["This vehicle will not have a push bumper","Push Bumper","PIT Wraps","Headlight Guards","I have a preference for a specific bumper brand/model"]'></div>
+    <div class="reveal" data-show="bumper~I have a preference for a specific bumper brand/model">
+      <label class="q">Preferred bumper make and model</label><input type="text" id="bumperMM"></div></div>
+</div></section>
+
+<!-- 11. PRISONER TRANSPORT & K9 (shows for Police agencies and/or K9 units) -->
+<section class="card hidden" id="ptk9"><div class="card-head"><div class="eyebrow">Section 11</div><h2>Prisoner Transport & K9</h2></div>
+<div class="card-body">
+  <div class="reveal" data-show="agencyType=Police">
+    <div class="field"><label class="q">Prisoner Transport Equipment (select all that apply)</label>
+      <div class="opts" data-check="ptEquip" data-options='["No prisoner transport equipment","Full front partition (behind front seats)","Single-cell / half partition (1 prisoner + gear on other side)","Prisoner transport seat (molded easy-clean, integrated belts)","Rear compartment / cargo partition","Window barriers — steel bars","Window barriers — polycarbonate","Easy-clean door panels","Easy-clean floor pan","Not sure — quote what you suggest","Other"]'></div>
+      <div class="reveal" data-show="ptEquip~Other"><input type="text" id="ptEquipOther"></div></div>
+    <div class="field"><label class="q">Partition window style preference</label>
+      <div class="opts" data-radio="ptWindow" data-options='["Clear polycarbonate w/ sliding window","Polycarbonate + expanded metal (mesh)","Full expanded metal","No preference"]'></div></div>
+    <div class="field"><label class="q">Prisoner transport brand preference</label>
+      <div class="opts" data-radio="ptBrand" data-options='["Pro-Gard","Setina","Gamber-Johnson","Tenhold (Jotto)","No preference — quote the best fit","Other"]'></div>
+      <div class="reveal" data-show="ptBrand=Other"><input type="text" id="ptBrandOther"></div></div>
+  </div>
+  <div class="reveal" data-show="use~K9 Unit">
+    <div class="field"><label class="q">K9 Transport Configuration</label>
+      <div class="opts" data-radio="k9Config" data-options='["Full-width K9 insert (entire rear compartment)","Half-width K9 + secure storage","K9 / prisoner combo (dual compartment)","Truck slide-in K9 unit","Not sure — quote the options","Other"]'></div>
+      <div class="reveal" data-show="k9Config=Other"><input type="text" id="k9ConfigOther"></div></div>
+    <div class="field"><label class="q">K9 Insert Options (select all that apply)</label>
+      <div class="opts" data-check="k9Opts" data-options='["Rubber flooring / easy-clean pan","Under-insert storage drawer","Water bowl mount","LED compartment lighting","None","Other"]'></div>
+      <div class="reveal" data-show="k9Opts~Other"><input type="text" id="k9OptsOther"></div></div>
+    <div class="field"><label class="q">K9 Safety Electronics — AceK9 (select all that apply)</label>
+      <div class="opts" data-check="k9Elec" data-options='["Hot-N-Pop Pro (heat alarm + door popper in one — most popular)","K9 Heat Alarm Pro (temperature monitoring only)","K9 Door Popper (bailout door release only)","AceWatchDog (smartphone monitoring add-on)","Window drop on alarm","Ventilation fan kit","Remote pager kit","Engine stall sensor","Not sure — quote what you suggest","None","Other"]'></div>
+      <div class="reveal" data-show="k9Elec~Other"><input type="text" id="k9ElecOther"></div></div>
+    <div class="field"><label class="q">K9 insert brand preference</label>
+      <div class="opts" data-radio="k9Brand" data-options='["Havis","American Aluminum (EZ Rider)","No preference — quote the best fit","Other"]'></div>
+      <div class="reveal" data-show="k9Brand=Other"><input type="text" id="k9BrandOther"></div></div>
+  </div>
+</div></section>
+
+<!-- 12. TINT & GRAPHICS -->
+<section class="card" data-sec="tint"><div class="card-head"><div class="eyebrow">Section 12</div><h2>Window Tint & Graphics</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Window Tinting Preference (choose per area)</label>
+    <table class="tint-grid" id="tintGrid">
+      <thead><tr><th>Glass Area</th><th>None</th><th>20%</th><th>35%</th><th>50%</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div style="margin-top:8px"><input type="text" id="tintNotes" placeholder="Specific tint requests, if any"></div></div>
+  <div class="field"><label class="q">Would you like us to help you with vehicle graphics?</label>
+    <div class="opts" data-radio="graphics" data-options='["No","Yes, I would like to copy our current design","Yes, I would like a new design","I am not sure at this point","Other"]'></div>
+    <div class="reveal" data-show="graphics=Yes, I would like to copy our current design|graphics=Yes, I would like a new design">
+      <div class="note">Please email photos of your current vehicles, logos, or design files (AI/EPS/PDF preferred) to <strong>sales@moveoveroutfitters.com</strong> along with this form.</div></div>
+    <div class="reveal" data-show="graphics=Other"><input type="text" id="graphicsOther"></div></div>
+</div></section>
+
+<!-- 12. ACCESSORIES -->
+<section class="card" data-sec="misc"><div class="card-head"><div class="eyebrow">Section 13</div><h2>Accessories & Power</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Miscellaneous Accessories — any interest in the following on your quote?</label>
+    <div class="opts" data-check="misc" data-options='["Weathertech Front Floor Liners","Weathertech Rear Floor Liners","Fire Extinguisher","Cell Modem","Thermal Camera Mounted on Spotlight","HAAS Digital Alert Broadcasting Unit","Opticom Traffic Signal Changing Device (if signals equipped)","Stop Sticks","Remote Spotlight","None","Other"]'></div>
+    <div class="reveal" data-show="misc~Other"><input type="text" id="miscOther"></div></div>
+  <div class="field reveal" data-show="agencyType=Police"><label class="q">Weapon Security</label>
+    <div class="hint">Shown for law enforcement agencies only.</div>
+    <div class="opts" data-check="weapon" data-options='["None","Command / Gun Vault","Single Weapon Mount","Dual Weapon Mount","Other"]'></div>
+    <div class="reveal" data-show="weapon~Other"><input type="text" id="weaponOther"></div></div>
+  <div class="field"><label class="q">Shore Power / Charger / Inverter</label>
+    <div class="opts" data-check="shore" data-options='["None","Charger &amp; Inverter All-In-One — keeps vehicle batteries charged on station, 120V power on shore power and while driving","Battery Charger Only","Power Inverter Only","Auto Eject for Shore Power — Red","Auto Eject for Shore Power — Yellow","Other"]'></div>
+    <div class="reveal" data-show="shore~Other"><input type="text" id="shoreOther"></div></div>
+  <div class="field reveal" id="truckSection">
+    <label class="q">Trucks Only — Cab / Bed / Exterior Accessories</label>
+    <div class="hint">Shown because your vehicle list includes a truck. Select anything you'd like on the quote.</div>
+    <div class="opts" data-check="truckAcc" data-options='["Tonneau Cover — Soft Roll-Up","Tonneau Cover — Hard Folding","Tonneau Cover — Retractable","Fiberglass Topper / Cap — numerous added options","Aluminum Topper / Cap — numerous added options","Spray-In Bed Liner","Drop-In Bed Liner / Bed Mat / BedRug","Bedslide / Cargo Slide","Decked Bed Organizer / Drawer System","Toolbox","Ladder / Utility Rack","Headache Rack / Cab Protector","Truck Side Steps / Running Boards","Bed Lighting","Tailgate Seal Kit","Bed Extender","Trailer Hitch / Towing Accessories","Mud Flaps / Fender Flares","None","Other"]'></div>
+    <div class="reveal" data-show="truckAcc~Other"><input type="text" id="truckAccOther"></div></div>
+</div></section>
+
+<!-- REVIEW -->
+<section class="card"><div class="card-head"><div class="eyebrow">Finish</div><h2>Review & Send</h2></div>
+<div class="card-body">
+  <p class="note" style="margin-bottom:12px">Generate a summary of your answers, then copy it, print it, or open a pre-filled email to Move Over Outfitters.</p>
+  <div id="missingPanel"></div>
+  <div class="actions">
+    <button class="btn btn-primary" id="genBtn">Generate summary</button>
+    <button class="btn btn-ghost" id="copyBtn" style="display:none">Copy summary</button>
+    <button class="btn btn-ghost" id="mailBtn" style="display:none">Email to MOO</button>
+    <button class="btn btn-ghost" id="printBtn" style="display:none">Print</button>
+    <button class="btn btn-ghost" id="resetBtn">Clear form</button>
+  </div>
+  <pre id="summaryOut"></pre>
+</div></section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const state={};
+
+// Build option groups
+$$('[data-radio],[data-check]').forEach(g=>{
+  const isRadio=g.hasAttribute('data-radio');
+  const name=g.dataset.radio||g.dataset.check;
+  const opts=JSON.parse(g.dataset.options.replaceAll('&apos;',"'").replaceAll('&amp;','&'));
+  opts.forEach(o=>{
+    const l=document.createElement('label');l.className='opt';
+    const i=document.createElement('input');i.type=isRadio?'radio':'checkbox';i.name=name;i.value=o;
+    const s=document.createElement('span');s.textContent=o;
+    l.append(i,s);g.append(l);
+    i.addEventListener('change',()=>{onChange(name)});
+  });
+});
+
+// Tint grid
+const tintRows=["Front Side Doors","Rear Side Doors","3rd Row Side Glass","Rear Glass","Top of Windshield (brow)","Full Windshield"];
+const tb=$('#tintGrid tbody');
+tintRows.forEach((r,ri)=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${r}</td>`+["None","20%","35%","50%"].map(v=>
+    `<td><input type="radio" name="tint${ri}" value="${v}" aria-label="${r} ${v}"></td>`).join('');
+  tb.append(tr);
+});
+$$('#tintGrid input').forEach(i=>i.addEventListener('change',()=>{save();paint()}));
+
+function val(name){
+  const els=$$(`[name="${CSS.escape(name)}"]`);
+  if(!els.length)return null;
+  if(els[0].type==='radio'){const c=els.find(e=>e.checked);return c?c.value:null}
+  return els.filter(e=>e.checked).map(e=>e.value);
+}
+function onChange(name){
+  // enforce mutual exclusion of "None"/"not have" style options in checkbox groups
+  const els=$$(`[name="${CSS.escape(name)}"]`);
+  if(els[0]&&els[0].type==='checkbox'){
+    const exclusive=v=>/^(none$|this vehicle will not)/i.test(v);
+    const last=document.activeElement;
+    if(last&&last.name===name&&last.checked){
+      if(exclusive(last.value)) els.forEach(e=>{if(e!==last)e.checked=false});
+      else els.forEach(e=>{if(exclusive(e.value))e.checked=false});
+    }
+  }
+  paint();save();
+}
+function paint(){
+  $$('.opt').forEach(l=>{l.classList.toggle('checked',l.querySelector('input').checked)});
+  $$('[data-show]').forEach(el=>{
+    const rules=el.dataset.show.split('|');
+    const open=rules.some(rule=>{
+      if(rule.includes('~')){const[n,v]=rule.split('~');const cur=val(n)||[];return cur.includes(v)}
+      const[n,v]=rule.split('=');return val(n)===v;
+    });
+    el.classList.toggle('open',open);
+  });
+  $('#truckSection').classList.toggle('open',VEH.some(v=>v.body==='Truck'));
+  $('#ptk9').classList.toggle('hidden',!(val('agencyType')==='Police'||(val('use')||[]).includes('K9 Unit')));
+  // police-only options
+  const isPolice=val('agencyType')==='Police';
+  $$('[name="reuse"]').forEach(i=>{
+    if(i.value==='Radar'){
+      i.closest('.opt').style.display=isPolice?'':'none';
+      if(!isPolice)i.checked=false;
+    }
+  });
+  // progress lightbar
+  const secs=$$('section[data-sec]');
+  let done=0;
+  secs.forEach(s=>{
+    const touched=[...s.querySelectorAll('input,textarea,select')].some(e=>{
+      if(e.id==='vQty')return false;
+      return (e.type==='radio'||e.type==='checkbox')?e.checked:e.value.trim()});
+    if(touched)done++;
+  });
+  const segs=$$('#lightbar .seg');
+  segs.forEach((sg,i)=>sg.classList.toggle('on',i<done));
+  $('#progLabel').textContent=`${done} of ${secs.length} sections started`;
+}
+// lightbar segments
+const lb=$('#lightbar');
+$$('section[data-sec]').forEach(()=>{const d=document.createElement('div');d.className='seg';lb.append(d)});
+
+// text inputs
+$$('input[type=text],input[type=tel],input[type=email],textarea').forEach(e=>
+  e.addEventListener('input',()=>{e.classList.remove('missing');save();paint()}));
+
+// add radio rows
+$('#addRadio').addEventListener('click',()=>{
+  const rows=$('#radioRows');
+  if(rows.children.length>=3)return;
+  const d=document.createElement('div');d.className='row';
+  d.innerHTML=`<input type="text" class="radioMM" placeholder="Radio ${rows.children.length+1} make/model">`;
+  rows.append(d);
+  d.querySelector('input').addEventListener('input',function(){this.classList.remove('missing');save();paint()});
+  if(rows.children.length>=3)$('#addRadio').style.display='none';
+});
+
+// ---------- vehicle picker ----------
+// [model, body, firstMY, lastMY, cabs?, beds?] — cabs/beds only for trucks
+const VDATA={
+"Chevrolet":[
+ ["Tahoe (PPV / SSV)","SUV",2016,2027],["Suburban","SUV",2016,2027],
+ ["Silverado 1500 (incl. PPV / SSV)","Truck",2016,2027,["Regular Cab","Double Cab","Crew Cab"],["Short Bed (5'8\")","Standard Bed (6'6\")","Long Bed (8')"]],
+ ["Silverado 2500 / 3500 HD","Truck",2016,2027,["Regular Cab","Double Cab","Crew Cab"],["Standard Bed (6'9\")","Long Bed (8')"]],
+ ["Silverado EV","Truck",2024,2027,["Crew Cab"],["5'11\" Bed (Midgate expandable)"]],
+ ["Colorado","Truck",2016,2027,["Extended Cab","Crew Cab"],["Short Bed (5'2\")","Long Bed (6'2\" — 2016–2022 only)"]],
+ ["Blazer EV PPV","SUV",2024,2027],["Traverse","SUV",2016,2027],["Equinox","SUV",2016,2027],["Express Van","Van",2016,2027],
+ ["Impala","Sedan",2016,2020],["Malibu","Sedan",2016,2025],["Caprice PPV","Sedan",2016,2017]],
+"Ford":[
+ ["Police Interceptor Utility / Explorer","SUV",2016,2027],
+ ["F-150 (incl. Police Responder / SSV)","Truck",2016,2027,["Regular Cab","SuperCab","SuperCrew"],["5.5' Bed","6.5' Bed","8' Bed"]],
+ ["F-150 Lightning (incl. Pro SSV)","Truck",2022,2027,["SuperCrew"],["5.5' Bed"]],
+ ["Super Duty F-250 / F-350","Truck",2016,2027,["Regular Cab","SuperCab","Crew Cab"],["6.75' Bed","8' Bed"]],
+ ["Ranger","Truck",2019,2027,["SuperCab (2019–2023)","SuperCrew"],["5' Bed","6' Bed (SuperCab, 2019–2023)"]],
+ ["Maverick","Truck",2022,2027,["SuperCrew"],["4.5' Flexbed"]],
+ ["Expedition (incl. SSV)","SUV",2016,2027],["Bronco","SUV",2021,2027],["Escape","SUV",2016,2026],["Edge","SUV",2016,2024],
+ ["Mustang Mach-E","SUV",2021,2027],["Fusion (incl. Police Responder Hybrid)","Sedan",2016,2020],["Taurus / PI Sedan","Sedan",2016,2019],
+ ["Transit","Van",2016,2027],["Transit Connect","Van",2016,2023],["E-Series Cutaway","Van",2016,2027]],
+"Dodge":[["Charger (incl. Pursuit)","Sedan",2016,2023],["Charger Daytona","Sedan",2024,2027],["Durango (incl. Pursuit)","SUV",2016,2027],["Journey","SUV",2016,2020]],
+"Ram":[
+ ["1500 (DT)","Truck",2019,2027,["Quad Cab","Crew Cab"],["5'7\" Bed","6'4\" Bed"]],
+ ["1500 Classic (DS)","Truck",2016,2024,["Regular Cab","Quad Cab","Crew Cab"],["5'7\" Bed","6'4\" Bed","8' Bed"]],
+ ["2500","Truck",2016,2027,["Regular Cab","Crew Cab","Mega Cab"],["6'4\" Bed","8' Bed"]],
+ ["3500","Truck",2016,2027,["Regular Cab","Crew Cab","Mega Cab"],["6'4\" Bed","8' Bed"]],
+ ["ProMaster","Van",2016,2027]],
+"GMC":[
+ ["Sierra 1500","Truck",2016,2027,["Regular Cab","Double Cab","Crew Cab"],["Short Bed (5'8\")","CarbonPro Short Bed (5'8\", 2019+)","Standard Bed (6'6\")","Long Bed (8')"]],
+ ["Sierra 2500 / 3500 HD","Truck",2016,2027,["Regular Cab","Double Cab","Crew Cab"],["Standard Bed (6'9\")","Long Bed (8')"]],
+ ["Sierra EV","Truck",2024,2027,["Crew Cab"],["5'11\" Bed (Midgate expandable)"]],
+ ["Canyon","Truck",2016,2027,["Extended Cab","Crew Cab"],["Short Bed (5'2\")","Long Bed (6'2\" — 2016–2022 only)"]],
+ ["Hummer EV Pickup","Truck",2022,2027,["Crew Cab"],["5' Bed"]],
+ ["Yukon / Yukon XL","SUV",2016,2027],["Acadia","SUV",2016,2027],["Terrain","SUV",2016,2027],["Savana Van","Van",2016,2027]],
+"Toyota":[
+ ["Tundra","Truck",2016,2027,["Double Cab","CrewMax"],["5.5' Bed","6.5' Bed","8.1' Bed"]],
+ ["Tacoma","Truck",2016,2027,["Access / XtraCab","Double Cab"],["5' Bed","6' Bed"]],
+ ["4Runner","SUV",2016,2027],["Sequoia","SUV",2016,2027],["Highlander","SUV",2016,2027],["RAV4","SUV",2016,2027],["Camry","Sedan",2016,2027],["Sienna","Van",2016,2027]],
+"Nissan":[
+ ["Titan","Truck",2016,2024,["King Cab","Crew Cab"],["5.5' Bed","6.5' Bed"]],
+ ["Titan XD","Truck",2016,2024,["King Cab","Crew Cab"],["6.5' Bed"]],
+ ["Frontier","Truck",2016,2027,["King Cab","Crew Cab"],["5' Bed","6' Bed"]],
+ ["Pathfinder","SUV",2016,2027],["Armada","SUV",2016,2027],["NV Cargo / Passenger","Van",2016,2021]],
+"Jeep":[["Gladiator","Truck",2020,2027,["Crew Cab"],["5' Bed"]],["Wrangler","SUV",2016,2027],["Grand Cherokee","SUV",2016,2027],["Cherokee","SUV",2016,2023]],
+"Honda":[["Ridgeline","Truck",2017,2027,["Crew Cab"],["5'4\" Bed (in-bed trunk)"]],["Pilot","SUV",2016,2027],["Passport","SUV",2019,2027],["CR-V","SUV",2016,2027]],
+"Rivian":[["R1T","Truck",2022,2027,["Crew Cab"],["4.5' Bed (Gear Tunnel)"]]],
+"Tesla":[["Cybertruck","Truck",2024,2027,["Crew Cab"],["6' Bed"]]],
+"Other":[]};
+const VEH=[];
+const ySel=$('#vYear'),mkSel=$('#vMake'),mdSel=$('#vModel');
+ySel.innerHTML='<option value="">Year…</option>'+Array.from({length:12},(_,i)=>2027-i).map(y=>`<option>${y}</option>`).join('');
+Object.keys(VDATA).forEach(k=>{const o=document.createElement('option');o.textContent=k;mkSel.append(o)});
+function fillModels(){
+  const mk=mkSel.value,y=parseInt(ySel.value)||null;
+  mdSel.innerHTML='<option value="">Model…</option>';
+  if(!mk){mdSel.disabled=true;toggleVOther();return}
+  (VDATA[mk]||[]).forEach(m=>{
+    if(y&&(y<m[2]||y>m[3]))return;
+    const o=document.createElement('option');o.value=m[0];o.textContent=m[0];mdSel.append(o);
+  });
+  const oo=document.createElement('option');oo.value='__other';oo.textContent='Other / not listed';mdSel.append(oo);
+  mdSel.disabled=false;toggleVOther();
+}
+function modelRec(){
+  const mk=mkSel.value;return (VDATA[mk]||[]).find(m=>m[0]===mdSel.value);
+}
+function toggleVOther(){
+  $('#vOtherWrap').classList.toggle('open',mkSel.value==='Other'||mdSel.value==='__other');
+  // cab/bed row for trucks
+  const rec=modelRec();
+  const isTruck=rec&&rec[1]==='Truck';
+  $('#truckOpts').classList.toggle('open',!!isTruck);
+  if(isTruck){
+    $('#vCab').innerHTML='<option value="">Cab…</option>'+(rec[4]||[]).map(c=>`<option>${c}</option>`).join('');
+    $('#vBed').innerHTML='<option value="">Bed…</option>'+(rec[5]||[]).map(b=>`<option>${b}</option>`).join('');
+  }
+}
+ySel.addEventListener('change',fillModels);
+mkSel.addEventListener('change',fillModels);
+mdSel.addEventListener('change',toggleVOther);
+function renderVehicles(persist=true){
+  const ul=$('#vList');ul.innerHTML='';
+  VEH.forEach((v,i)=>{
+    const li=document.createElement('li');
+    const detail=[v.cab,v.bed].filter(Boolean).join(', ');
+    const label=`${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' — '+v.trim:''}${detail?' ('+detail+')':''}  ×${v.qty}`;
+    li.innerHTML=`<span>${label}</span>`;
+    const rm=document.createElement('button');rm.type='button';rm.className='rm';rm.textContent='✕';
+    rm.setAttribute('aria-label','Remove '+label);
+    rm.addEventListener('click',()=>{VEH.splice(i,1);renderVehicles()});
+    li.append(rm);ul.append(li);
+  });
+  paint();
+  if(persist)save();
+}
+$('#addVehicle').addEventListener('click',()=>{
+  const mk=mkSel.value;
+  if(!mk){alert('Pick a make first.');return}
+  let model,body,cab='',bed='';
+  if(mk==='Other'||mdSel.value==='__other'){
+    model=$('#vOther').value.trim();
+    if(!model){alert('Type the year / make / model in the box.');return}
+    body=$('#vOtherBody').value;
+  }else{
+    if(!mdSel.value){alert('Pick a model.');return}
+    const rec=modelRec();
+    model=mdSel.value;body=rec?rec[1]:'SUV';
+    if(body==='Truck'){cab=$('#vCab').value;bed=$('#vBed').value}
+  }
+  VEH.push({year:ySel.value,make:mk==='Other'?'':mk,model,body,cab,bed,
+    trim:$('#vTrim').value.trim(),qty:Math.max(1,parseInt($('#vQty').value)||1)});
+  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';toggleVOther();
+  renderVehicles();
+});
+
+// ---------- persistence ----------
+let saveT;
+function collect(){
+  const data={fields:{},groups:{},tint:{},radios:$$('.radioMM').map(e=>e.value),vehicles:VEH};
+  $$('input[id],textarea[id]').forEach(e=>data.fields[e.id]=e.value);
+  $$('[data-radio],[data-check]').forEach(g=>{const n=g.dataset.radio||g.dataset.check;data.groups[n]=val(n)});
+  tintRows.forEach((r,i)=>data.tint[r]=val('tint'+i));
+  return data;
+}
+function save(){
+  clearTimeout(saveT);
+  saveT=setTimeout(async()=>{
+    try{
+      localStorage.setItem('moo-build-form-draft',JSON.stringify(collect()));
+      $('#saveStatus').textContent='Draft saved '+new Date().toLocaleTimeString();
+    }catch(e){$('#saveStatus').textContent='Draft autosave unavailable — keep this tab open'}
+  },600);
+}
+async function load(){
+  let data;
+  try{const r=localStorage.getItem('moo-build-form-draft');data=r?JSON.parse(r):null}catch(e){return}
+  if(!data)return;
+  Object.entries(data.fields||{}).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
+  Object.entries(data.groups||{}).forEach(([n,v])=>{
+    if(v==null)return;
+    const vals=Array.isArray(v)?v:[v];
+    $$(`[name="${CSS.escape(n)}"]`).forEach(e=>e.checked=vals.includes(e.value));
+  });
+  (data.radios||[]).forEach((v,i)=>{
+    if(i>0)$('#addRadio').click();
+    const inputs=$$('.radioMM');if(inputs[i])inputs[i].value=v;
+  });
+  (data.vehicles||[]).forEach(v=>VEH.push(v));
+  if(VEH.length)renderVehicles(false);
+  tintRows.forEach((r,i)=>{
+    const v=(data.tint||{})[r];if(!v)return;
+    const e=$$(`[name="tint${i}"]`).find(x=>x.value===v);if(e)e.checked=true;
+  });
+  paint();
+}
+load();paint();
+
+// ---------- summary ----------
+function line(label,v){
+  if(v==null||v===''||(Array.isArray(v)&&!v.length))return '';
+  return label.toUpperCase()+': '+(Array.isArray(v)?v.join(', '):v)+'\n';
+}
+function buildSummary(){
+  const g=n=>val(n),f=id=>($('#'+id)?.value||'').trim();
+  let s='MOVE OVER OUTFITTERS — NEW VEHICLE BUILD FORM\n';
+  s+='Submitted: '+new Date().toLocaleString()+'\n';
+  s+='='.repeat(48)+'\n\n';
+  if(MISSING.length){
+    s+='!!! MISSING DETAILS — MOO NEEDS THESE TO ORDER PARTS !!!\n';
+    s+=MISSING.map(m=>'  - '+m).join('\n')+'\n';
+    s+='Agency to follow up by email or phone.\n\n';
+  }
+  s+=line('Agency',f('agency'))+line('Contact',f('contact'))+line('Phone',f('phone'))+line('Email',f('email'));
+  s+=line('Notes',f('notes'));
+  s+=line('Agency Type',g('agencyType')==='Other'?f('agencyTypeOther')||'Other':g('agencyType'));
+  s+='\n— NEW VEHICLE —\n';
+  s+=line('Vehicle Certainty',g('vehicleCertainty'));
+  s+=line('Vehicles In Mind',f('vehicleIdeas'));
+  const vlines=VEH.map(v=>{
+    const detail=[v.cab,v.bed].filter(Boolean).join(', ');
+    return `${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' '+v.trim:''}${detail?' ('+detail+')':''} x${v.qty}`});
+  s+=line('Vehicle(s)',vlines);
+  let use=g('use')||[];if(use.includes('Other')&&f('useOther'))use=use.map(u=>u==='Other'?'Other: '+f('useOther'):u);
+  s+=line('Intended Use',use);
+  s+='\n— TRADE-IN / DONOR —\n'+line('Trade-In',g('hasTrade'));
+  if((g('hasTrade')||'').startsWith('Yes')){
+    s+=line('Trade-In Vehicle',f('tradeYMM'));
+    let ru=g('reuse')||[];if(ru.includes('Other')&&f('reuseOther'))ru=ru.map(u=>u==='Other'?'Other: '+f('reuseOther'):u);
+    s+=line('Items to Reuse',ru);
+  }
+  const lightGrp=(n,other)=>{let v=g(n)||[];if(v.includes('Other')&&f(other))v=v.map(u=>u==='Other'?'Other: '+f(other):u);return v};
+  s+='\n— LIGHTING —\n';
+  s+=line('Front',lightGrp('frontLight','frontLightOther'));
+  s+=line('Side',lightGrp('sideLight','sideLightOther'));
+  s+=line('Rear',lightGrp('rearLight','rearLightOther'));
+  s+=line('Interior',lightGrp('intLight','intLightOther'));
+  s+='\n— SIREN & CONTROL —\n';
+  s+=line('Controller',g('sirenCtrl')==='Other'?'Other: '+f('sirenCtrlOther'):g('sirenCtrl'));
+  s+=line('Primary Speaker',g('sirenSpk'))+line('Low Frequency',g('lowFreq'))+line('Brand/Requirements',f('sirenNotes'));
+  s+='\n— CONSOLE / COMPUTER / PRINTER —\n';
+  let con=g('console');if(con&&con.startsWith('Reuse')&&f('consoleMM'))con+=' — '+f('consoleMM');
+  if(con==='Other')con='Other: '+f('consoleOther');
+  s+=line('Console',con);
+  s+=line('Computer',g('computer')==='Yes, a computer / mount is needed'?('Needed — '+(f('computerMM')||'make/model TBD')):g('computer'));
+  s+=line('Printer',g('printer')==='I have a printer'?('Existing — '+(f('printerMM')||'make/model TBD')):g('printer'));
+  s+='\n— RADIO(S) —\n'+line('Radio Plan',g('radio'));
+  const radios=$$('.radioMM').map(e=>e.value.trim()).filter(Boolean);
+  s+=line('Radio Make/Model',radios);
+  s+=line('Mount Style',g('radioMount')==='Other'?'Other: '+f('radioMountOther'):g('radioMount'));
+  s+='\n— CAMERA / BUMPER —\n'+line('Camera',g('camera'))+line('Camera Make/Model',f('cameraMM'));
+  s+=line('Bumper',g('bumper'))+line('Bumper Make/Model',f('bumperMM'));
+  if(g('agencyType')==='Police'||(g('use')||[]).includes('K9 Unit')){
+    s+='\n— PRISONER TRANSPORT / K9 —\n';
+    s+=line('Prisoner Equipment',lightGrp('ptEquip','ptEquipOther'));
+    s+=line('Partition Window Style',g('ptWindow'));
+    s+=line('Prisoner Brand',g('ptBrand')==='Other'?'Other: '+f('ptBrandOther'):g('ptBrand'));
+    s+=line('K9 Configuration',g('k9Config')==='Other'?'Other: '+f('k9ConfigOther'):g('k9Config'));
+    s+=line('K9 Insert Options',lightGrp('k9Opts','k9OptsOther'));
+    s+=line('K9 Electronics (AceK9)',lightGrp('k9Elec','k9ElecOther'));
+    s+=line('K9 Brand',g('k9Brand')==='Other'?'Other: '+f('k9BrandOther'):g('k9Brand'));
+  }
+  s+='\n— TINT & GRAPHICS —\n';
+  tintRows.forEach((r,i)=>{s+=line('Tint: '+r,val('tint'+i))});
+  s+=line('Tint Notes',f('tintNotes'));
+  s+=line('Graphics',g('graphics')==='Other'?'Other: '+f('graphicsOther'):g('graphics'));
+  s+='\n— ACCESSORIES & POWER —\n';
+  s+=line('Misc Accessories',lightGrp('misc','miscOther'));
+  s+=line('Weapon Security',lightGrp('weapon','weaponOther'));
+  s+=line('Shore Power/Charger/Inverter',lightGrp('shore','shoreOther'));
+  if(VEH.some(v=>v.body==='Truck'))s+=line('Truck Cab/Bed/Exterior Accessories',lightGrp('truckAcc','truckAccOther'));
+  return s;
+}
+function ft(id){const e=document.getElementById(id);return e?e.value.trim():''}
+const CRIT=[
+ {label:'Agency or company name',why:'we need to know who this build is for',when:()=>true,els:()=>['agency'],ok:()=>!!ft('agency')},
+ {label:'Contact name',why:'who we call with build questions',when:()=>true,els:()=>['contact'],ok:()=>!!ft('contact')},
+ {label:'Contact phone',why:'so we can reach you quickly if something needs a decision',when:()=>true,els:()=>['phone'],ok:()=>!!ft('phone')},
+ {label:'Contact email',why:'where we send the quote',when:()=>true,els:()=>['email'],ok:()=>!!ft('email')},
+ {label:'Vehicle selection',why:'the vehicle determines nearly every part we order — add at least one, or describe what you have in mind',when:()=>true,els:()=>['vMake'],ok:()=>VEH.length>0||!!ft('vehicleIdeas')},
+ {label:'Computer make & model',why:'determines the correct dock, mount, and charger — guessing wrong means reorders and delays',when:()=>val('computer')==='Yes, a computer / mount is needed',els:()=>['computerMM'],ok:()=>!!ft('computerMM')},
+ {label:'Printer make & model',why:'determines the correct printer mount and wiring',when:()=>val('printer')==='I have a printer',els:()=>['printerMM'],ok:()=>!!ft('printerMM')},
+ {label:'Radio make & model',why:'determines the console bracket and faceplates we order — we can\'t build your console correctly without it',when:()=>val('radio')==='I have radio(s) — make and model below',els:()=>[...document.querySelectorAll('.radioMM')],ok:()=>$$('.radioMM').some(e=>e.value.trim())},
+ {label:'Radio mount style',why:'tells us which control-head bracket to order',when:()=>val('radio')==='I have radio(s) — make and model below',els:()=>[],ok:()=>!!val('radioMount')},
+ {label:'Camera make & model',why:'each camera system needs different mounts and wiring',when:()=>{const c=val('camera')||[];return c.some(v=>v.indexOf('make/model below')>-1)},els:()=>['cameraMM'],ok:()=>!!ft('cameraMM')},
+ {label:'Existing console make & model',why:'confirms your console fits the new body style and which mounting kit we order',when:()=>(val('console')||'').indexOf('Reuse')===0,els:()=>['consoleMM'],ok:()=>!!ft('consoleMM')},
+ {label:'Preferred bumper make & model',why:'so we quote the exact bumper you want instead of a substitute',when:()=>(val('bumper')||[]).includes('I have a preference for a specific bumper brand/model'),els:()=>['bumperMM'],ok:()=>!!ft('bumperMM')}
+];
+function critIssues(){return CRIT.filter(c=>c.when()&&!c.ok())}
+function markMissing(issues){
+  $$('.missing').forEach(e=>e.classList.remove('missing'));
+  issues.forEach(c=>c.els().forEach(x=>{
+    const el=typeof x==='string'?document.getElementById(x):x;
+    if(el)el.classList.add('missing');
+  }));
+}
+function scrollToIssue(c){
+  const x=c.els()[0];const el=typeof x==='string'?document.getElementById(x):x;
+  if(el){el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>{if(el.focus)el.focus()},450)}
+}
+function renderPanel(issues){
+  const p=$('#missingPanel');
+  p.innerHTML='<h3>Hold up — a few details we really need</h3>'+
+    '<div class="note" style="margin-bottom:6px">These directly affect the parts we order for your build. Skipping them usually means a phone call, a delay, or the wrong part showing up.</div>'+
+    issues.map((c,i)=>`<div class="mi"><b>${c.label} — <a data-mi="${i}">take me there</a></b><span>Why we ask: ${c.why}.</span></div>`).join('')+
+    '<div class="actions" style="margin-top:10px"><button type="button" class="btn btn-primary btn-sm" id="fixBtn">Fix these now</button>'+
+    '<button type="button" class="btn btn-ghost btn-sm" id="anywayBtn">Generate anyway — I\'ll send these later</button></div>';
+  p.style.display='block';
+  p.querySelectorAll('a[data-mi]').forEach(a=>a.addEventListener('click',()=>scrollToIssue(issues[+a.dataset.mi])));
+  $('#fixBtn').addEventListener('click',()=>scrollToIssue(issues[0]));
+  $('#anywayBtn').addEventListener('click',()=>doGenerate(true));
+}
+let MISSING=[];
+function doGenerate(force){
+  const issues=critIssues();
+  markMissing(issues);
+  if(issues.length&&!force){renderPanel(issues);$('#missingPanel').scrollIntoView({behavior:'smooth',block:'nearest'});return}
+  if(!issues.length)$('#missingPanel').style.display='none';
+  MISSING=issues.map(c=>c.label);
+  const out=$('#summaryOut');out.textContent=buildSummary();out.style.display='block';
+  ['copyBtn','mailBtn','printBtn'].forEach(id=>$('#'+id).style.display='inline-block');
+  out.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+$('#genBtn').addEventListener('click',()=>doGenerate(false));
+$('#copyBtn').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText($('#summaryOut').textContent);$('#copyBtn').textContent='Copied ✓';
+    setTimeout(()=>$('#copyBtn').textContent='Copy summary',1800);}catch(e){alert('Select the text and copy manually.')}
+});
+$('#mailBtn').addEventListener('click',()=>{
+  const body=encodeURIComponent($('#summaryOut').textContent.slice(0,1800)+'\n\n(Full form attached or pasted below if truncated)');
+  const subj=encodeURIComponent('New Vehicle Build Form — '+(($('#agency').value)||'Agency'));
+  location.href=`mailto:sales@moveoveroutfitters.com?subject=${subj}&body=${body}`;
+});
+$('#printBtn').addEventListener('click',()=>window.print());
+$('#resetBtn').addEventListener('click',async()=>{
+  if(!confirm('Clear all answers and the saved draft?'))return;
+  try{localStorage.removeItem('moo-build-form-draft')}catch(e){}
+  location.reload();
+});
+</script>
+</body>
+</html>

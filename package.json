@@ -1,0 +1,8 @@
+{
+  "name": "moo-build-form",
+  "version": "1.0.0",
+  "description": "Move Over Outfitters — New Vehicle Build Form",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
