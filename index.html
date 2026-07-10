@@ -205,8 +205,7 @@ textarea{resize:vertical;min-height:64px}
 <section class="card" data-sec="console"><div class="card-head"><div class="eyebrow">Section 6</div><h2>Console</h2></div>
 <div class="card-body">
   <div class="field"><label class="q">Console Preference</label>
-    <div class="opts" data-radio="console" data-options='["This vehicle will not have an aftermarket console","New metal console — open to options","I prefer Havis branded consoles","I prefer Gamber branded consoles","Reuse my existing console (same body style)","Other"]'></div>
-    <div class="reveal" data-show="console=Reuse my existing console (same body style)"><label class="q">Existing console make and model</label><input type="text" id="consoleMM"></div>
+    <div class="opts" data-radio="console" data-options='["New metal console — open to options","I prefer Havis branded consoles","I prefer Gamber branded consoles","Other"]'></div>
     <div class="reveal" data-show="console=Other"><input type="text" id="consoleOther"></div></div>
 </div></section>
 
@@ -359,7 +358,7 @@ const state={};
 const GATES={
   lighting:'emergency lighting',
   siren:'a siren & light controller',
-  console:'a console',
+  console:{opts:['This vehicle will not have a console','The vehicle will retain the factory console. This retains a factory look but limits the amount of equipment we can install.','I am interested in being quoted a console'],yes:'I am interested in being quoted a console'},
   computer:'a computer / printer',
   radios:'radio(s)',
   camera:'a camera system',
@@ -368,10 +367,12 @@ const GATES={
   misc:'additional accessories',
   power:'shore power / charging equipment'
 };
-Object.entries(GATES).forEach(([sec,thing])=>{
+Object.entries(GATES).forEach(([sec,conf])=>{
   const body=document.querySelector(`section[data-sec="${sec}"] .card-body`);
   if(!body)return;
-  const yes=`I am interested in quoting ${thing}`;
+  const thing=typeof conf==='string'?conf:conf.thing;
+  const yes=(typeof conf==='object'&&conf.yes)?conf.yes:`I am interested in quoting ${thing}`;
+  const optList=(typeof conf==='object'&&conf.opts)?conf.opts:[`This vehicle will not have ${thing}`,yes];
   const wrap=document.createElement('div');
   wrap.className='reveal gate-reveal';
   wrap.setAttribute('data-show',`gate_${sec}=${yes}`);
@@ -379,7 +380,7 @@ Object.entries(GATES).forEach(([sec,thing])=>{
   const field=document.createElement('div');field.className='field';
   const opts=document.createElement('div');opts.className='opts';
   opts.setAttribute('data-radio',`gate_${sec}`);
-  opts.setAttribute('data-options',JSON.stringify([`This vehicle will not have ${thing}`,yes]));
+  opts.setAttribute('data-options',JSON.stringify(optList));
   field.append(opts);
   body.append(field,wrap);
 });
@@ -710,7 +711,7 @@ function buildSummary(){
   s+=line('Controller',g('sirenCtrl')==='Other'?'Other: '+f('sirenCtrlOther'):g('sirenCtrl'));
   s+=line('Primary Speaker',g('sirenSpk'))+line('Low Frequency',g('lowFreq'))+line('Brand/Requirements',f('sirenNotes'));
   s+='\n— CONSOLE / COMPUTER / PRINTER —\n'+line('Console Interest',g('gate_console')||'(not answered)')+line('Computer/Printer Interest',g('gate_computer')||'(not answered)');
-  let con=g('console');if(con&&con.startsWith('Reuse')&&f('consoleMM'))con+=' — '+f('consoleMM');
+  let con=g('console');
   if(con==='Other')con='Other: '+f('consoleOther');
   s+=line('Console',con);
   s+=line('Computer',g('computer')==='Yes, a computer / mount is needed'?('Needed — '+(f('computerMM')||'make/model TBD')):g('computer'));
@@ -756,7 +757,6 @@ const CRIT=[
  {label:'Radio make & model',why:'determines the console bracket and faceplates we order — we can\'t build your console correctly without it',when:()=>val('radio')==='I have radio(s) — make and model below',els:()=>[...document.querySelectorAll('.radioMM')],ok:()=>$$('.radioMM').some(e=>e.value.trim())},
  {label:'Radio mount style',why:'tells us which control-head bracket to order',when:()=>val('radio')==='I have radio(s) — make and model below',els:()=>[],ok:()=>!!val('radioMount')},
  {label:'Camera make & model',why:'each camera system needs different mounts and wiring',when:()=>{const c=val('camera')||[];return c.some(v=>v.indexOf('make/model below')>-1)},els:()=>['cameraMM'],ok:()=>!!ft('cameraMM')},
- {label:'Existing console make & model',why:'confirms your console fits the new body style and which mounting kit we order',when:()=>(val('console')||'').indexOf('Reuse')===0,els:()=>['consoleMM'],ok:()=>!!ft('consoleMM')},
  {label:'Preferred bumper make & model',why:'so we quote the exact bumper you want instead of a substitute',when:()=>(val('bumper')||[]).includes('I have a preference for a specific bumper brand/model'),els:()=>['bumperMM'],ok:()=>!!ft('bumperMM')}
 ];
 function critIssues(){return CRIT.filter(c=>c.when()&&!c.ok())}
