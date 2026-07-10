@@ -227,7 +227,10 @@ textarea{resize:vertical;min-height:64px}
 <div class="card-body">
   <div class="field"><label class="q">Radio Requirements</label>
     <div class="hint">This is important so we can order and install all items.</div>
-    <div class="opts" data-radio="radio" data-options='["This vehicle will not need an in-car radio","Prewire the vehicle for one radio that will be installed at a later date","I need to buy radio(s) — interested to hear the options","I have radio(s) — make and model below"]'></div>
+    <div class="opts" data-radio="radio" data-options='["This vehicle will need a portable radio charger installed","Prewire the vehicle for one radio that will be installed at a later date","I need to buy radio(s) — interested to hear the options","I have radio(s) — make and model below"]'></div>
+    <div class="reveal" data-show="radio=This vehicle will need a portable radio charger installed">
+      <label class="q">Portable radio / charger make and model</label>
+      <input type="text" id="chargerMM" placeholder="e.g. Motorola APX 6000 — impres charger"></div>
     <div class="reveal" data-show="radio=I have radio(s) — make and model below">
       <label class="q">Radio make and model (up to 3)</label>
       <div class="hint">The exact radio determines the console bracket and faceplates we order — without it we can't build your console correctly.</div>
@@ -360,7 +363,7 @@ const GATES={
   siren:'a siren & light controller',
   console:{opts:['This vehicle will not have a console','The vehicle will retain the factory console. This retains a factory look but limits the amount of equipment we can install.','I am interested in being quoted a console'],yes:'I am interested in being quoted a console'},
   computer:'a computer / printer',
-  radios:'radio(s)',
+  radios:{opts:['No radios or radio chargers needed for this vehicle','Radio Items Needed for this vehicle'],yes:'Radio Items Needed for this vehicle'},
   camera:'a camera system',
   bumper:'a push bumper / guard',
   tint:'window tint or graphics',
@@ -717,6 +720,7 @@ function buildSummary(){
   s+=line('Computer',g('computer')==='Yes, a computer / mount is needed'?('Needed — '+(f('computerMM')||'make/model TBD')):g('computer'));
   s+=line('Printer',g('printer')==='I have a printer'?('Existing — '+(f('printerMM')||'make/model TBD')):g('printer'));
   s+='\n— RADIO(S) —\n'+gate('radios')+line('Radio Plan',g('radio'));
+  if(g('radio')==='This vehicle will need a portable radio charger installed')s+=line('Portable Radio/Charger Make-Model',f('chargerMM'));
   const radios=$$('.radioMM').map(e=>e.value.trim()).filter(Boolean);
   s+=line('Radio Make/Model',radios);
   s+=line('Mount Style',g('radioMount')==='Other'?'Other: '+f('radioMountOther'):g('radioMount'));
