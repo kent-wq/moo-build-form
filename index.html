@@ -141,6 +141,10 @@ textarea{resize:vertical;min-height:64px}
       <input type="number" id="vQty" min="1" value="1" style="max-width:90px" aria-label="Quantity">
       <button type="button" class="btn btn-ghost btn-sm" id="addVehicle">+ Add vehicle</button>
     </div>
+    <div class="vrow">
+      <input type="text" id="vUnit" placeholder="Vehicle / unit # — optional, if handy">
+      <input type="text" id="vVin" placeholder="VIN — optional, if handy" maxlength="17">
+    </div>
     <div class="reveal" id="vOtherWrap">
       <div class="vrow" style="margin-bottom:0">
         <input type="text" id="vOther" placeholder="Type the year / make / model">
@@ -566,7 +570,8 @@ function renderVehicles(persist=true){
   VEH.forEach((v,i)=>{
     const li=document.createElement('li');
     const detail=[v.cab,v.bed].filter(Boolean).join(', ');
-    const label=`${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' — '+v.trim:''}${detail?' ('+detail+')':''}  ×${v.qty}`;
+    const ids=[v.unit?'Unit '+v.unit:'',v.vin?'VIN '+v.vin:''].filter(Boolean).join(', ');
+    const label=`${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' — '+v.trim:''}${detail?' ('+detail+')':''}  ×${v.qty}${ids?' — '+ids:''}`;
     li.innerHTML=`<span>${label}</span>`;
     const rm=document.createElement('button');rm.type='button';rm.className='rm';rm.textContent='✕';
     rm.setAttribute('aria-label','Remove '+label);
@@ -591,8 +596,9 @@ $('#addVehicle').addEventListener('click',()=>{
     if(body==='Truck'){cab=$('#vCab').value;bed=$('#vBed').value}
   }
   VEH.push({year:ySel.value,make:mk==='Other'?'':mk,model,body,cab,bed,
-    trim:$('#vTrim').value.trim(),qty:Math.max(1,parseInt($('#vQty').value)||1)});
-  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';toggleVOther();
+    trim:$('#vTrim').value.trim(),qty:Math.max(1,parseInt($('#vQty').value)||1),
+    unit:$('#vUnit').value.trim(),vin:$('#vVin').value.trim().toUpperCase()});
+  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';$('#vUnit').value='';$('#vVin').value='';toggleVOther();
   renderVehicles();
 });
 
@@ -661,7 +667,8 @@ function buildSummary(){
   s+=line('Vehicles In Mind',f('vehicleIdeas'));
   const vlines=VEH.map(v=>{
     const detail=[v.cab,v.bed].filter(Boolean).join(', ');
-    return `${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' '+v.trim:''}${detail?' ('+detail+')':''} x${v.qty}`});
+    const ids=[v.unit?'Unit '+v.unit:'',v.vin?'VIN '+v.vin:''].filter(Boolean).join(', ');
+    return `${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' '+v.trim:''}${detail?' ('+detail+')':''} x${v.qty}${ids?' — '+ids:''}`});
   s+=line('Vehicle(s)',vlines);
   let use=g('use')||[];if(use.includes('Other')&&f('useOther'))use=use.map(u=>u==='Other'?'Other: '+f('useOther'):u);
   s+=line('Intended Use',use);
