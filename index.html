@@ -135,7 +135,7 @@ textarea{resize:vertical;min-height:64px}
     <div class="vrow reveal" id="truckOpts">
       <select id="vCab" aria-label="Cab configuration"></select>
       <select id="vBed" aria-label="Bed length"></select>
-      <label id="vFactoryWrap" class="opt" style="display:none;flex:1;min-width:220px;margin:0"><input type="checkbox" id="vFactory"><span id="vFactoryLabel"></span></label>
+      <select id="vFactory" style="display:none" aria-label="Factory bed option"></select>
     </div>
     <div class="vrow">
       <input type="text" id="vTrim" placeholder="Trim / package (PPV, SSV, Pursuit…) — optional">
@@ -565,13 +565,14 @@ function toggleVOther(){
   // brand-specific factory bed options
   let fb='';
   if(isTruck){
-    if(mkSel.value==='GMC')fb='Add MultiPro Tailgate (factory option)';
-    else if(mkSel.value==='Chevrolet')fb='Add Multi-Flex Tailgate (factory option)';
-    else if(mkSel.value==='Ram')fb='Add RamBox Bed Storage (factory option)';
+    if(mkSel.value==='GMC')fb='MultiPro Tailgate';
+    else if(mkSel.value==='Chevrolet')fb='Multi-Flex Tailgate';
+    else if(mkSel.value==='Ram')fb='RamBox';
   }
-  $('#vFactoryWrap').style.display=fb?'':'none';
-  $('#vFactoryLabel').textContent=fb;
-  if(!fb)$('#vFactory').checked=false;
+  const fsel=$('#vFactory');
+  fsel.style.display=fb?'':'none';
+  fsel.dataset.name=fb;
+  fsel.innerHTML=fb?`<option value="">${fb} — Yes or No?</option><option>Yes</option><option>No</option>`:'';
 }
 ySel.addEventListener('change',fillModels);
 mkSel.addEventListener('change',fillModels);
@@ -606,11 +607,12 @@ $('#addVehicle').addEventListener('click',()=>{
     model=mdSel.value;body=rec?rec[1]:'SUV';
     if(body==='Truck'){cab=$('#vCab').value;bed=$('#vBed').value}
   }
-  const bedopt=$('#vFactory').checked?$('#vFactoryLabel').textContent.replace(/^Add /,'').replace(/ \(factory option\)$/,''):'';
+  const fsel=$('#vFactory');
+  const bedopt=fsel.value?fsel.dataset.name+': '+fsel.value:'';
   VEH.push({year:ySel.value,make:mk==='Other'?'':mk,model,body,cab,bed,bedopt,
     trim:$('#vTrim').value.trim(),qty:Math.max(1,parseInt($('#vQty').value)||1),
     unit:$('#vUnit').value.trim(),vin:$('#vVin').value.trim().toUpperCase()});
-  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';$('#vUnit').value='';$('#vVin').value='';$('#vFactory').checked=false;toggleVOther();
+  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';$('#vUnit').value='';$('#vVin').value='';$('#vFactory').value='';toggleVOther();
   renderVehicles();
 });
 
