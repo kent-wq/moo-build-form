@@ -252,7 +252,7 @@ textarea{resize:vertical;min-height:64px}
 <section class="card" data-sec="bumper"><div class="card-head"><div class="eyebrow">Section 10</div><h2>Front Bumper / Push Bumper / Guard</h2></div>
 <div class="card-body">
   <div class="field"><label class="q">Select all that apply</label>
-    <div class="opts" data-check="bumper" data-options='["This vehicle will not have a push bumper","Push Bumper","PIT Wraps","Headlight Guards","I have a preference for a specific bumper brand/model"]'></div>
+    <div class="opts" data-check="bumper" data-options='["Push Bumper","PIT Wraps","Headlight Guards","I have a preference for a specific bumper brand/model"]'></div>
     <div class="reveal" data-show="bumper~I have a preference for a specific bumper brand/model">
       <label class="q">Preferred bumper make and model</label><input type="text" id="bumperMM"></div></div>
 </div></section>
@@ -286,8 +286,8 @@ textarea{resize:vertical;min-height:64px}
   </div>
 </div></section>
 
-<!-- 12. TINT & GRAPHICS -->
-<section class="card" data-sec="tint"><div class="card-head"><div class="eyebrow">Section 12</div><h2>Window Tint & Graphics</h2></div>
+<!-- 12. WINDOW TINT -->
+<section class="card" data-sec="tint"><div class="card-head"><div class="eyebrow">Section 12</div><h2>Window Tint</h2></div>
 <div class="card-body">
   <div class="field"><label class="q">Window Tinting Preference (choose per area)</label>
     <table class="tint-grid" id="tintGrid">
@@ -295,6 +295,11 @@ textarea{resize:vertical;min-height:64px}
       <tbody></tbody>
     </table>
     <div style="margin-top:8px"><input type="text" id="tintNotes" placeholder="Specific tint requests, if any"></div></div>
+</div></section>
+
+<!-- 13. GRAPHICS -->
+<section class="card" data-sec="graphics"><div class="card-head"><div class="eyebrow">Section 13</div><h2>Graphics</h2></div>
+<div class="card-body">
   <div class="field"><label class="q">Would you like us to help you with vehicle graphics?</label>
     <div class="opts" data-radio="graphics" data-options='["No","Yes, I would like to copy our current design","Yes, I would like a new design","I am not sure at this point","Other"]'></div>
     <div class="reveal" data-show="graphics=Yes, I would like to copy our current design|graphics=Yes, I would like a new design">
@@ -302,8 +307,8 @@ textarea{resize:vertical;min-height:64px}
     <div class="reveal" data-show="graphics=Other"><input type="text" id="graphicsOther"></div></div>
 </div></section>
 
-<!-- 13. ACCESSORIES -->
-<section class="card" data-sec="misc"><div class="card-head"><div class="eyebrow">Section 13</div><h2>Accessories</h2></div>
+<!-- 14. ACCESSORIES -->
+<section class="card" data-sec="misc"><div class="card-head"><div class="eyebrow">Section 14</div><h2>Accessories</h2></div>
 <div class="card-body">
   <div class="field"><label class="q">Miscellaneous Accessories — any interest in the following on your quote?</label>
     <div class="opts" data-check="misc" data-options='["Weathertech Front Floor Liners","Weathertech Rear Floor Liners","Fire Extinguisher","Cell Modem","Thermal Camera Mounted on Spotlight","HAAS Digital Alert Broadcasting Unit","Opticom Traffic Signal Changing Device (if signals equipped)","Stop Sticks","Remote Spotlight","None","Other"]'></div>
@@ -319,8 +324,8 @@ textarea{resize:vertical;min-height:64px}
     <div class="reveal" data-show="truckAcc~Other"><input type="text" id="truckAccOther"></div></div>
 </div></section>
 
-<!-- 14. POWER -->
-<section class="card" data-sec="power"><div class="card-head"><div class="eyebrow">Section 14</div><h2>Power</h2></div>
+<!-- 15. POWER -->
+<section class="card" data-sec="power"><div class="card-head"><div class="eyebrow">Section 15</div><h2>Power</h2></div>
 <div class="card-body">
   <div class="field"><label class="q">Shore Power / Charger / Inverter</label>
     <div class="opts" data-check="shore" data-options='["None","Charger &amp; Inverter All-In-One — keeps vehicle batteries charged on station, 120V power on shore power and while driving","Battery Charger Only","Power Inverter Only","Kussmaul Auto Eject for Shore Power","Other"]'></div>
@@ -361,7 +366,7 @@ const GATES={
   radios:{opts:['No radios or radio chargers needed for this vehicle','Radio Items Needed for this vehicle'],yes:'Radio Items Needed for this vehicle'},
   camera:'a camera system',
   bumper:'a push bumper / guard',
-  tint:'window tint or graphics',
+  tint:'window tint',
   misc:'additional accessories',
   power:'shore power / charging equipment'
 };
@@ -743,9 +748,10 @@ function buildSummary(){
     s+=line('K9 Electronics (AceK9)',lightGrp('k9Elec','k9ElecOther'));
     s+=line('K9 Brand',g('k9Brand')==='Other'?'Other: '+f('k9BrandOther'):g('k9Brand'));
   }
-  s+='\n— TINT & GRAPHICS —\n'+gate('tint');
+  s+='\n— WINDOW TINT —\n'+gate('tint');
   tintRows.forEach((r,i)=>{s+=line('Tint: '+r,val('tint'+i))});
   s+=line('Tint Notes',f('tintNotes'));
+  s+='\n— GRAPHICS —\n';
   s+=line('Graphics',g('graphics')==='Other'?'Other: '+f('graphicsOther'):g('graphics'));
   s+='\n— ACCESSORIES —\n'+gate('misc');
   s+=line('Misc Accessories',lightGrp('misc','miscOther'));
