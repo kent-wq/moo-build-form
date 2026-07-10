@@ -135,6 +135,7 @@ textarea{resize:vertical;min-height:64px}
     <div class="vrow reveal" id="truckOpts">
       <select id="vCab" aria-label="Cab configuration"></select>
       <select id="vBed" aria-label="Bed length"></select>
+      <label id="vFactoryWrap" class="opt" style="display:none;flex:1;min-width:220px;margin:0"><input type="checkbox" id="vFactory"><span id="vFactoryLabel"></span></label>
     </div>
     <div class="vrow">
       <input type="text" id="vTrim" placeholder="Trim / package (PPV, SSV, Pursuit…) — optional">
@@ -304,8 +305,8 @@ textarea{resize:vertical;min-height:64px}
     <div class="reveal" data-show="graphics=Other"><input type="text" id="graphicsOther"></div></div>
 </div></section>
 
-<!-- 12. ACCESSORIES -->
-<section class="card" data-sec="misc"><div class="card-head"><div class="eyebrow">Section 13</div><h2>Accessories & Power</h2></div>
+<!-- 13. ACCESSORIES -->
+<section class="card" data-sec="misc"><div class="card-head"><div class="eyebrow">Section 13</div><h2>Accessories</h2></div>
 <div class="card-body">
   <div class="field"><label class="q">Miscellaneous Accessories — any interest in the following on your quote?</label>
     <div class="opts" data-check="misc" data-options='["Weathertech Front Floor Liners","Weathertech Rear Floor Liners","Fire Extinguisher","Cell Modem","Thermal Camera Mounted on Spotlight","HAAS Digital Alert Broadcasting Unit","Opticom Traffic Signal Changing Device (if signals equipped)","Stop Sticks","Remote Spotlight","None","Other"]'></div>
@@ -314,14 +315,23 @@ textarea{resize:vertical;min-height:64px}
     <div class="hint">Shown for law enforcement agencies only.</div>
     <div class="opts" data-check="weapon" data-options='["None","Command / Gun Vault","Single Weapon Mount","Dual Weapon Mount","Other"]'></div>
     <div class="reveal" data-show="weapon~Other"><input type="text" id="weaponOther"></div></div>
-  <div class="field"><label class="q">Shore Power / Charger / Inverter</label>
-    <div class="opts" data-check="shore" data-options='["None","Charger &amp; Inverter All-In-One — keeps vehicle batteries charged on station, 120V power on shore power and while driving","Battery Charger Only","Power Inverter Only","Auto Eject for Shore Power — Red","Auto Eject for Shore Power — Yellow","Other"]'></div>
-    <div class="reveal" data-show="shore~Other"><input type="text" id="shoreOther"></div></div>
   <div class="field reveal" id="truckSection">
     <label class="q">Trucks Only — Cab / Bed / Exterior Accessories</label>
     <div class="hint">Shown because your vehicle list includes a truck. Select anything you'd like on the quote.</div>
-    <div class="opts" data-check="truckAcc" data-options='["Tonneau Cover — Soft Roll-Up","Tonneau Cover — Hard Folding","Tonneau Cover — Retractable","Fiberglass Topper / Cap — numerous added options","Aluminum Topper / Cap — numerous added options","Spray-In Bed Liner","Drop-In Bed Liner / Bed Mat / BedRug","Bedslide / Cargo Slide","Decked Bed Organizer / Drawer System","Toolbox","Ladder / Utility Rack","Headache Rack / Cab Protector","Truck Side Steps / Running Boards","Bed Lighting","Tailgate Seal Kit","Bed Extender","MultiPro / Multi-Flex Tailgate (GMC / Chevrolet factory option)","RamBox Bed Storage (Ram factory option)","Trailer Hitch / Towing Accessories","Mud Flaps / Fender Flares","None","Other"]'></div>
+    <div class="opts" data-check="truckAcc" data-options='["Tonneau Cover — Soft Roll-Up","Tonneau Cover — Hard Folding","Tonneau Cover — Retractable","Fiberglass Topper / Cap — numerous added options","Aluminum Topper / Cap — numerous added options","Spray-In Bed Liner","Drop-In Bed Liner / Bed Mat / BedRug","Bedslide / Cargo Slide","Decked Bed Organizer / Drawer System","Toolbox","Ladder / Utility Rack","Headache Rack / Cab Protector","Truck Side Steps / Running Boards","Bed Lighting","Tailgate Seal Kit","Bed Extender","Trailer Hitch / Towing Accessories","Mud Flaps / Fender Flares","None","Other"]'></div>
     <div class="reveal" data-show="truckAcc~Other"><input type="text" id="truckAccOther"></div></div>
+</div></section>
+
+<!-- 14. POWER -->
+<section class="card" data-sec="power"><div class="card-head"><div class="eyebrow">Section 14</div><h2>Power</h2></div>
+<div class="card-body">
+  <div class="field"><label class="q">Shore Power / Charger / Inverter</label>
+    <div class="opts" data-check="shore" data-options='["None","Charger &amp; Inverter All-In-One — keeps vehicle batteries charged on station, 120V power on shore power and while driving","Battery Charger Only","Power Inverter Only","Kussmaul Auto Eject for Shore Power","Other"]'></div>
+    <div class="reveal" data-show="shore~Other"><input type="text" id="shoreOther"></div>
+    <div class="reveal" data-show="shore~Kussmaul Auto Eject for Shore Power">
+      <label class="q">Auto Eject cover color</label>
+      <div class="opts" data-radio="autoEjectColor" data-options='["Red","Yellow","White","Black","No preference"]'></div>
+    </div></div>
 </div></section>
 
 <!-- REVIEW -->
@@ -355,7 +365,8 @@ const GATES={
   camera:'a camera system',
   bumper:'a push bumper / guard',
   tint:'window tint or graphics',
-  misc:'accessories / power options'
+  misc:'additional accessories',
+  power:'shore power / charging equipment'
 };
 Object.entries(GATES).forEach(([sec,thing])=>{
   const body=document.querySelector(`section[data-sec="${sec}"] .card-body`);
@@ -433,16 +444,6 @@ function paint(){
     el.classList.toggle('open',open);
   });
   $('#truckSection').classList.toggle('open',VEH.some(v=>v.body==='Truck'));
-  // make-specific truck options
-  const truckMake=mks=>VEH.some(v=>v.body==='Truck'&&mks.includes(v.make));
-  $$('[name="truckAcc"]').forEach(i=>{
-    let show=null;
-    if(i.value.startsWith('MultiPro'))show=truckMake(['Chevrolet','GMC']);
-    if(i.value.startsWith('RamBox'))show=truckMake(['Ram']);
-    if(show===null)return;
-    i.closest('.opt').style.display=show?'':'none';
-    if(!show)i.checked=false;
-  });
   $('#ptk9').classList.toggle('hidden',!(val('agencyType')==='Police'||(val('use')||[]).includes('K9 Unit')));
   // police-only options
   const isPolice=val('agencyType')==='Police';
@@ -561,6 +562,16 @@ function toggleVOther(){
     $('#vCab').innerHTML='<option value="">Cab…</option>'+(rec[4]||[]).map(c=>`<option>${c}</option>`).join('');
     $('#vBed').innerHTML='<option value="">Bed…</option>'+(rec[5]||[]).map(b=>`<option>${b}</option>`).join('');
   }
+  // brand-specific factory bed options
+  let fb='';
+  if(isTruck){
+    if(mkSel.value==='GMC')fb='Add MultiPro Tailgate (factory option)';
+    else if(mkSel.value==='Chevrolet')fb='Add Multi-Flex Tailgate (factory option)';
+    else if(mkSel.value==='Ram')fb='Add RamBox Bed Storage (factory option)';
+  }
+  $('#vFactoryWrap').style.display=fb?'':'none';
+  $('#vFactoryLabel').textContent=fb;
+  if(!fb)$('#vFactory').checked=false;
 }
 ySel.addEventListener('change',fillModels);
 mkSel.addEventListener('change',fillModels);
@@ -569,7 +580,7 @@ function renderVehicles(persist=true){
   const ul=$('#vList');ul.innerHTML='';
   VEH.forEach((v,i)=>{
     const li=document.createElement('li');
-    const detail=[v.cab,v.bed].filter(Boolean).join(', ');
+    const detail=[v.cab,v.bed,v.bedopt].filter(Boolean).join(', ');
     const ids=[v.unit?'Unit '+v.unit:'',v.vin?'VIN '+v.vin:''].filter(Boolean).join(', ');
     const label=`${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' — '+v.trim:''}${detail?' ('+detail+')':''}  ×${v.qty}${ids?' — '+ids:''}`;
     li.innerHTML=`<span>${label}</span>`;
@@ -595,10 +606,11 @@ $('#addVehicle').addEventListener('click',()=>{
     model=mdSel.value;body=rec?rec[1]:'SUV';
     if(body==='Truck'){cab=$('#vCab').value;bed=$('#vBed').value}
   }
-  VEH.push({year:ySel.value,make:mk==='Other'?'':mk,model,body,cab,bed,
+  const bedopt=$('#vFactory').checked?$('#vFactoryLabel').textContent.replace(/^Add /,'').replace(/ \(factory option\)$/,''):'';
+  VEH.push({year:ySel.value,make:mk==='Other'?'':mk,model,body,cab,bed,bedopt,
     trim:$('#vTrim').value.trim(),qty:Math.max(1,parseInt($('#vQty').value)||1),
     unit:$('#vUnit').value.trim(),vin:$('#vVin').value.trim().toUpperCase()});
-  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';$('#vUnit').value='';$('#vVin').value='';toggleVOther();
+  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';$('#vUnit').value='';$('#vVin').value='';$('#vFactory').checked=false;toggleVOther();
   renderVehicles();
 });
 
@@ -666,7 +678,7 @@ function buildSummary(){
   s+=line('Vehicle Certainty',g('vehicleCertainty'));
   s+=line('Vehicles In Mind',f('vehicleIdeas'));
   const vlines=VEH.map(v=>{
-    const detail=[v.cab,v.bed].filter(Boolean).join(', ');
+    const detail=[v.cab,v.bed,v.bedopt].filter(Boolean).join(', ');
     const ids=[v.unit?'Unit '+v.unit:'',v.vin?'VIN '+v.vin:''].filter(Boolean).join(', ');
     return `${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' '+v.trim:''}${detail?' ('+detail+')':''} x${v.qty}${ids?' — '+ids:''}`});
   s+=line('Vehicle(s)',vlines);
@@ -714,11 +726,13 @@ function buildSummary(){
   tintRows.forEach((r,i)=>{s+=line('Tint: '+r,val('tint'+i))});
   s+=line('Tint Notes',f('tintNotes'));
   s+=line('Graphics',g('graphics')==='Other'?'Other: '+f('graphicsOther'):g('graphics'));
-  s+='\n— ACCESSORIES & POWER —\n'+gate('misc');
+  s+='\n— ACCESSORIES —\n'+gate('misc');
   s+=line('Misc Accessories',lightGrp('misc','miscOther'));
   s+=line('Weapon Security',lightGrp('weapon','weaponOther'));
-  s+=line('Shore Power/Charger/Inverter',lightGrp('shore','shoreOther'));
   if(VEH.some(v=>v.body==='Truck'))s+=line('Truck Cab/Bed/Exterior Accessories',lightGrp('truckAcc','truckAccOther'));
+  s+='\n— POWER —\n'+gate('power');
+  s+=line('Shore Power/Charger/Inverter',lightGrp('shore','shoreOther'));
+  if((g('shore')||[]).includes('Kussmaul Auto Eject for Shore Power'))s+=line('Auto Eject Cover Color',g('autoEjectColor'));
   return s;
 }
 function ft(id){const e=document.getElementById(id);return e?e.value.trim():''}
