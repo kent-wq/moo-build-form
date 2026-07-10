@@ -78,7 +78,10 @@ textarea{resize:vertical;min-height:64px}
 .vrow.reveal.open{display:flex}
 .vrow select,.vrow input[type=text]{flex:1;min-width:130px}
 .vlist{list-style:none;margin-top:6px}
-.vlist li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;margin-bottom:6px;background:#fff;font-size:15px}
+.vlist li{display:block;padding:9px 12px;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;margin-bottom:6px;background:#fff;font-size:15px}
+.vlist .vmain{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.vlist .vids{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap}
+.vlist .vids input{flex:1;min-width:130px;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px}
 .vlist .rm{background:none;border:none;color:var(--red);font-weight:700;cursor:pointer;font-size:16px;padding:2px 6px}
 @media print{header,.actions,.btn,.savebar{display:none}#summaryOut{display:block;max-height:none;border:none}}
 @media (prefers-reduced-motion:reduce){.lightbar .seg{transition:none}}
@@ -142,10 +145,7 @@ textarea{resize:vertical;min-height:64px}
       <input type="number" id="vQty" min="1" value="1" style="max-width:90px" aria-label="Quantity">
       <button type="button" class="btn btn-ghost btn-sm" id="addVehicle">+ Add vehicle</button>
     </div>
-    <div class="vrow">
-      <input type="text" id="vUnit" placeholder="Vehicle / unit # — optional, if handy">
-      <input type="text" id="vVin" placeholder="VIN — optional, if handy" maxlength="17">
-    </div>
+    <div class="hint">After adding a vehicle, you can enter its unit # and VIN on the vehicle's line below — optional, if you have them handy.</div>
     <div class="reveal" id="vOtherWrap">
       <div class="vrow" style="margin-bottom:0">
         <input type="text" id="vOther" placeholder="Type the year / make / model">
@@ -582,13 +582,20 @@ function renderVehicles(persist=true){
   VEH.forEach((v,i)=>{
     const li=document.createElement('li');
     const detail=[v.cab,v.bed,v.bedopt].filter(Boolean).join(', ');
-    const ids=[v.unit?'Unit '+v.unit:'',v.vin?'VIN '+v.vin:''].filter(Boolean).join(', ');
-    const label=`${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' — '+v.trim:''}${detail?' ('+detail+')':''}  ×${v.qty}${ids?' — '+ids:''}`;
-    li.innerHTML=`<span>${label}</span>`;
+    const label=`${v.year?v.year+' ':''}${v.make?v.make+' ':''}${v.model}${v.trim?' — '+v.trim:''}${detail?' ('+detail+')':''}  ×${v.qty}`;
+    const top=document.createElement('div');top.className='vmain';
+    const sp=document.createElement('span');sp.textContent=label;
     const rm=document.createElement('button');rm.type='button';rm.className='rm';rm.textContent='✕';
     rm.setAttribute('aria-label','Remove '+label);
     rm.addEventListener('click',()=>{VEH.splice(i,1);renderVehicles()});
-    li.append(rm);ul.append(li);
+    top.append(sp,rm);
+    const ids=document.createElement('div');ids.className='vids';
+    const u=document.createElement('input');u.type='text';u.placeholder='Vehicle / unit # — optional';u.value=v.unit||'';
+    u.addEventListener('input',()=>{v.unit=u.value.trim();save()});
+    const vn=document.createElement('input');vn.type='text';vn.placeholder='VIN — optional';vn.maxLength=17;vn.value=v.vin||'';
+    vn.addEventListener('input',()=>{v.vin=vn.value.trim().toUpperCase();save()});
+    ids.append(u,vn);
+    li.append(top,ids);ul.append(li);
   });
   paint();
   if(persist)save();
@@ -611,8 +618,8 @@ $('#addVehicle').addEventListener('click',()=>{
   const bedopt=fsel.value?fsel.dataset.name+': '+fsel.value:'';
   VEH.push({year:ySel.value,make:mk==='Other'?'':mk,model,body,cab,bed,bedopt,
     trim:$('#vTrim').value.trim(),qty:Math.max(1,parseInt($('#vQty').value)||1),
-    unit:$('#vUnit').value.trim(),vin:$('#vVin').value.trim().toUpperCase()});
-  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';$('#vUnit').value='';$('#vVin').value='';$('#vFactory').value='';toggleVOther();
+    unit:'',vin:''});
+  mdSel.value='';$('#vTrim').value='';$('#vQty').value=1;$('#vOther').value='';$('#vFactory').value='';toggleVOther();
   renderVehicles();
 });
 
