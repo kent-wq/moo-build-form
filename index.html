@@ -225,22 +225,17 @@ textarea{resize:vertical;min-height:64px}
 <!-- 8. RADIOS -->
 <section class="card" data-sec="radios"><div class="card-head"><div class="eyebrow">Section 8</div><h2>Radio(s)</h2></div>
 <div class="card-body">
-  <div class="field"><label class="q">Radio Requirements</label>
+  <div class="field"><label class="q">Radio Requirements (select all that apply)</label>
     <div class="hint">This is important so we can order and install all items.</div>
-    <div class="opts" data-radio="radio" data-options='["This vehicle will need a portable radio charger installed","Prewire the vehicle for one radio that will be installed at a later date","I need to buy radio(s) — interested to hear the options","I have radio(s) — make and model below"]'></div>
-    <div class="reveal" data-show="radio=This vehicle will need a portable radio charger installed">
+    <div class="opts" data-check="radio" data-options='["This vehicle will need a portable radio charger installed","Prewire the vehicle for one radio that will be installed at a later date","I need to buy radio(s) — interested to hear the options","I have radio(s) — make and model below"]'></div>
+    <div class="reveal" data-show="radio~This vehicle will need a portable radio charger installed">
       <label class="q">Portable radio / charger make and model</label>
       <input type="text" id="chargerMM" placeholder="e.g. Motorola APX 6000 — impres charger"></div>
-    <div class="reveal" data-show="radio=I have radio(s) — make and model below">
-      <label class="q">Radio make and model (up to 3)</label>
+    <div class="reveal" data-show="radio~I have radio(s) — make and model below">
+      <label class="q">Radio(s) — make, model, and mount style (up to 3)</label>
       <div class="hint">The exact radio determines the console bracket and faceplates we order — without it we can't build your console correctly.</div>
-      <div class="radio-rows" id="radioRows">
-        <div class="row"><input type="text" class="radioMM" placeholder="Radio 1 make/model"></div>
-      </div>
+      <div class="radio-rows" id="radioRows"></div>
       <button type="button" class="btn btn-ghost btn-sm" id="addRadio">+ Add another radio</button>
-      <div class="field" style="margin-top:12px"><label class="q">Customer-supplied radio mount style</label>
-        <div class="opts" data-radio="radioMount" data-options='["Console Mounted","Remote Head (trunk / cargo mounted body)","Dash Mounted","Not sure — recommend one","Other"]'></div>
-        <div class="reveal" data-show="radioMount=Other"><input type="text" id="radioMountOther"></div></div>
     </div></div>
 </div></section>
 
@@ -478,16 +473,23 @@ $$('section[data-sec]').forEach(()=>{const d=document.createElement('div');d.cla
 $$('input[type=text],input[type=tel],input[type=email],textarea').forEach(e=>
   e.addEventListener('input',()=>{e.classList.remove('missing');save();paint()}));
 
-// add radio rows
-$('#addRadio').addEventListener('click',()=>{
+// add radio rows (make / model / mount style)
+function addRadioRow(){
   const rows=$('#radioRows');
-  if(rows.children.length>=3)return;
+  if(rows.children.length>=3)return null;
+  const n=rows.children.length+1;
   const d=document.createElement('div');d.className='row';
-  d.innerHTML=`<input type="text" class="radioMM" placeholder="Radio ${rows.children.length+1} make/model">`;
+  d.innerHTML=`<input type="text" class="rMake" placeholder="Radio ${n} make (e.g. Motorola)">`+
+    `<input type="text" class="rModel" placeholder="Radio ${n} model (e.g. APX 8500)">`+
+    `<select class="rMount" aria-label="Radio ${n} mount style"><option value="">Mount style…</option><option>Console Mounted</option><option>Remote Mounted</option><option>Not sure</option></select>`;
   rows.append(d);
-  d.querySelector('input').addEventListener('input',function(){this.classList.remove('missing');save();paint()});
+  d.querySelectorAll('input').forEach(e=>e.addEventListener('input',function(){this.classList.remove('missing');save();paint()}));
+  d.querySelector('select').addEventListener('change',()=>{save();paint()});
   if(rows.children.length>=3)$('#addRadio').style.display='none';
-});
+  return d;
+}
+addRadioRow();
+$('#addRadio').addEventListener('click',addRadioRow);
 
 // ---------- vehicle picker ----------
 // [model, body, firstMY, lastMY, cabs?, beds?] — cabs/beds only for trucks
@@ -630,7 +632,7 @@ $('#addVehicle').addEventListener('click',()=>{
 // ---------- persistence ----------
 let saveT;
 function collect(){
-  const data={fields:{},groups:{},tint:{},radios:$$('.radioMM').map(e=>e.value),vehicles:VEH};
+  const data={fields:{},groups:{},tint:{},radios:$$('#radioRows .row').map(r=>({make:r.querySelector('.rMake').value,model:r.querySelector('.rModel').value,mount:r.querySelector('.rMount').value})),vehicles:VEH};
   $$('input[id],textarea[id]').forEach(e=>data.fields[e.id]=e.value);
   $$('[data-radio],[data-check]').forEach(g=>{const n=g.dataset.radio||g.dataset.check;data.groups[n]=val(n)});
   tintRows.forEach((r,i)=>data.tint[r]=val('tint'+i));
@@ -656,8 +658,10 @@ async function load(){
     $$(`[name="${CSS.escape(n)}"]`).forEach(e=>e.checked=vals.includes(e.value));
   });
   (data.radios||[]).forEach((v,i)=>{
-    if(i>0)$('#addRadio').click();
-    const inputs=$$('.radioMM');if(inputs[i])inputs[i].value=v;
+    if(i>0)addRadioRow();
+    const r=$$('#radioRows .row')[i];if(!r)return;
+    if(typeof v==='string'){r.querySelector('.rMake').value=v}
+    else{r.querySelector('.rMake').value=v.make||'';r.querySelector('.rModel').value=v.model||'';r.querySelector('.rMount').value=v.mount||''}
   });
   (data.vehicles||[]).forEach(v=>VEH.push(v));
   if(VEH.length)renderVehicles(false);
@@ -720,10 +724,13 @@ function buildSummary(){
   s+=line('Computer',g('computer')==='Yes, a computer / mount is needed'?('Needed — '+(f('computerMM')||'make/model TBD')):g('computer'));
   s+=line('Printer',g('printer')==='I have a printer'?('Existing — '+(f('printerMM')||'make/model TBD')):g('printer'));
   s+='\n— RADIO(S) —\n'+gate('radios')+line('Radio Plan',g('radio'));
-  if(g('radio')==='This vehicle will need a portable radio charger installed')s+=line('Portable Radio/Charger Make-Model',f('chargerMM'));
-  const radios=$$('.radioMM').map(e=>e.value.trim()).filter(Boolean);
-  s+=line('Radio Make/Model',radios);
-  s+=line('Mount Style',g('radioMount')==='Other'?'Other: '+f('radioMountOther'):g('radioMount'));
+  if((g('radio')||[]).includes('This vehicle will need a portable radio charger installed'))s+=line('Portable Radio/Charger Make-Model',f('chargerMM'));
+  const radios=$$('#radioRows .row').map(r=>{
+    const mk=r.querySelector('.rMake').value.trim(),md=r.querySelector('.rModel').value.trim(),mt=r.querySelector('.rMount').value;
+    if(!mk&&!md)return '';
+    return [mk,md].filter(Boolean).join(' ')+(mt?' — '+mt:' — mount TBD');
+  }).filter(Boolean);
+  s+=line('Radio(s)',radios);
   s+='\n— CAMERA / BUMPER —\n'+line('Camera Interest',g('gate_camera')||'(not answered)')+line('Camera',g('camera'))+line('Camera Make/Model',f('cameraMM'));
   s+=line('Bumper Interest',g('gate_bumper')||'(not answered)')+line('Bumper',g('bumper'))+line('Bumper Make/Model',f('bumperMM'));
   if(g('agencyType')==='Police'||(g('use')||[]).includes('K9 Unit')){
@@ -758,8 +765,7 @@ const CRIT=[
  {label:'Vehicle selection',why:'the vehicle determines nearly every part we order — add at least one, or describe what you have in mind',when:()=>true,els:()=>['vMake'],ok:()=>VEH.length>0||!!ft('vehicleIdeas')},
  {label:'Computer make & model',why:'determines the correct dock, mount, and charger — guessing wrong means reorders and delays',when:()=>val('computer')==='Yes, a computer / mount is needed',els:()=>['computerMM'],ok:()=>!!ft('computerMM')},
  {label:'Printer make & model',why:'determines the correct printer mount and wiring',when:()=>val('printer')==='I have a printer',els:()=>['printerMM'],ok:()=>!!ft('printerMM')},
- {label:'Radio make & model',why:'determines the console bracket and faceplates we order — we can\'t build your console correctly without it',when:()=>val('radio')==='I have radio(s) — make and model below',els:()=>[...document.querySelectorAll('.radioMM')],ok:()=>$$('.radioMM').some(e=>e.value.trim())},
- {label:'Radio mount style',why:'tells us which control-head bracket to order',when:()=>val('radio')==='I have radio(s) — make and model below',els:()=>[],ok:()=>!!val('radioMount')},
+ {label:'Radio make & model',why:'determines the console bracket and faceplates we order — we can\'t build your console correctly without it',when:()=>(val('radio')||[]).includes('I have radio(s) — make and model below'),els:()=>[...document.querySelectorAll('#radioRows input')],ok:()=>$$('#radioRows input').some(e=>e.value.trim())},
  {label:'Camera make & model',why:'each camera system needs different mounts and wiring',when:()=>{const c=val('camera')||[];return c.some(v=>v.indexOf('make/model below')>-1)},els:()=>['cameraMM'],ok:()=>!!ft('cameraMM')},
  {label:'Preferred bumper make & model',why:'so we quote the exact bumper you want instead of a substitute',when:()=>(val('bumper')||[]).includes('I have a preference for a specific bumper brand/model'),els:()=>['bumperMM'],ok:()=>!!ft('bumperMM')}
 ];
