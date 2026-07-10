@@ -107,7 +107,9 @@ textarea{resize:vertical;min-height:64px}
 <!-- 1. CONTACT -->
 <section class="card" data-sec="contact"><div class="card-head"><div class="eyebrow">Section 1</div><h2>Agency & Contact</h2></div>
 <div class="card-body">
-  <div class="field"><label class="q">Agency or Company Name *</label><input type="text" id="agency"></div>
+  <div class="field"><label class="q">Is this a personal vehicle or an agency / company vehicle? *</label>
+    <div class="opts" data-radio="vehOwner" data-options='["Personal vehicle","Agency / Company vehicle"]'></div></div>
+  <div class="field reveal" data-show="vehOwner=Agency / Company vehicle"><label class="q">Agency or Company Name *</label><input type="text" id="agency"></div>
   <div class="field"><label class="q">Contact Person (rank &amp; name) *</label><input type="text" id="contact" placeholder="e.g. Sgt. John Smith"></div>
   <div class="field"><label class="q">Contact Phone Number *</label><input type="tel" id="phone" placeholder="765-555-5555"></div>
   <div class="field"><label class="q">Contact Email *</label><input type="email" id="email" placeholder="example@example.com"></div>
@@ -693,7 +695,9 @@ function buildSummary(){
     s+=MISSING.map(m=>'  - '+m).join('\n')+'\n';
     s+='Agency to follow up by email or phone.\n\n';
   }
-  s+=line('Agency',f('agency'))+line('Contact',f('contact'))+line('Phone',f('phone'))+line('Email',f('email'));
+  s+=line('Vehicle Ownership',g('vehOwner'));
+  if(g('vehOwner')==='Agency / Company vehicle')s+=line('Agency',f('agency'));
+  s+=line('Contact',f('contact'))+line('Phone',f('phone'))+line('Email',f('email'));
   s+=line('Notes',f('notes'));
   s+=line('Agency Type',g('agencyType')==='Other'?f('agencyTypeOther')||'Other':g('agencyType'));
   s+='\n— NEW VEHICLE —\n';
@@ -764,7 +768,8 @@ function buildSummary(){
 }
 function ft(id){const e=document.getElementById(id);return e?e.value.trim():''}
 const CRIT=[
- {label:'Agency or company name',why:'we need to know who this build is for',when:()=>true,els:()=>['agency'],ok:()=>!!ft('agency')},
+ {label:'Personal or agency / company vehicle',why:'tells us who this build is for',when:()=>true,els:()=>[],ok:()=>!!val('vehOwner')},
+ {label:'Agency or company name',why:'we need to know who this build is for',when:()=>val('vehOwner')==='Agency / Company vehicle',els:()=>['agency'],ok:()=>!!ft('agency')},
  {label:'Contact name',why:'who we call with build questions',when:()=>true,els:()=>['contact'],ok:()=>!!ft('contact')},
  {label:'Contact phone',why:'so we can reach you quickly if something needs a decision',when:()=>true,els:()=>['phone'],ok:()=>!!ft('phone')},
  {label:'Contact email',why:'where we send the quote',when:()=>true,els:()=>['email'],ok:()=>!!ft('email')},
